@@ -1,1 +1,8 @@
-var v1 int
+package main
+
+import "fmt"
+
+func main() {
+	name := "Michelle"
+	fmt.Println("Hello", name)
+}
