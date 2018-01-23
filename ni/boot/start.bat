@@ -1,8 +1,36 @@
 ﻿@echo off
-@echo 启动本地开发节点
-::msg %username% /time:3 /w "正在启动本地开发节点..."
-goto continue
-:continue
-start werl +sbt ns +sub true  -boot start_sasl -config sasl -env ERL_LIBS ../lib -env ERL_MAX_ETS_TABLES 10000 +pc unicode
 
-exit
+set nowpath=%CD%
+set curpath=
+
+if "%1" == "" ( goto :getgopath ) else (
+	set curpath=%1
+	goto :setgopath
+)
+
+:getgopath
+for /f "tokens=1* delims=\" %%a in ("%nowpath%") do (
+	if "%%a" == "src" (
+		goto :setgopath
+	) else (
+		if "%curpath%" == "" (
+			set curpath=%%a
+		) else (
+			set curpath=%curpath%\%%a
+		)
+		set nowpath=%%b
+	)
+)
+if defined nowpath ( goto :getgopath ) else ( goto :end )
+
+
+:setgopath
+if not "%curpath%" == "" (
+	set GOPATH=%GOPATH%;%curpath%
+)
+goto :end
+
+
+:end
+echo %GOPATH%
+pause

@@ -14,3 +14,12 @@ GOPATH = D:work\plugin;D:\work\project1;
 
 #### 3. 配置 GOROOT
 就是Go的根路径C:\Go\，类似Java_home
+
+## 工程结构
+一个GO工程中主要包含以下三个目录：
+
+src：源代码文件
+
+pkg：包文件
+
+bin：相关bin文件

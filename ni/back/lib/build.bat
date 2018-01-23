@@ -1,7 +1,6 @@
-@echo off
-if not exist ebin (
-    md  ebin
-)
-erl -make
-
+set GOPATH=%GOPATH%;%CD%
+go build hello
+go install hello
+go build main
+go install main
 pause
