@@ -1,9 +1,7 @@
 package main
-import (
-	"fmt"
-	"hello"
-)
+
+import "hello"
 
 func main() {
-	hello.say()
+	hello.Say()
 }
