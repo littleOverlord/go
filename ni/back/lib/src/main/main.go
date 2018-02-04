@@ -1,14 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	
 	"router"
 )
 
 func main() {
-	//hello.Say()
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
-		router.Distribute(w,r)
+		err := router.Distribute(w,r)
+		if(err != nil){
+			fmt.Println(r.URL.Path,err.Error())
+		}
    });
-	http.ListenAndServe(":8989",nil);
+	http.ListenAndServe(":8080",nil);
 }
