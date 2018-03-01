@@ -3,13 +3,13 @@
 ## PATH
 ### windows
 #### 1. 配置 系统环境变量的 Path
-比如你的GO安装路径是C:\Go, 则把C:\Go\bin添加到Path中;
+比如你的GO安装路径是C:\Go, 则把C:\Go\bin添加到Path中;<br />
 接下来我们在windows每个路径下面，都可以用CMD命令行直接运行Go命令
 
 #### 2. 配置 GOPATH
-GOPATH用于运行时默认寻找Go依赖包的地址；
-开发项目目录为：D:\work\project1;
-引入第三方包目录为: D:work\plugin;
+GOPATH用于运行时默认寻找Go依赖包的地址；<br />
+开发项目目录为：D:\work\project1;<br />
+引入第三方包目录为: D:work\plugin;<br />
 GOPATH = D:work\plugin;D:\work\project1;
 
 #### 3. 配置 GOROOT
