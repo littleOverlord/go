@@ -23,3 +23,24 @@ src：源代码文件
 pkg：包文件
 
 bin：相关bin文件
+
+## 包
+### 包导入
++相对路径
+import ".model"  //<--是与当前文件同一目录的model目录,但是不建议使用这种方式来导包
+
++绝对路径
+import "shortcut/model" //<--加载gopath/src/shortulr/model模块
+
++包名操作
+-import(."fmt")
+这个点操作的含义就是这个包导入之后在你调用这个包的函数时， 你可以省略前缀的包名， 也就是前面你调用的fmt. Println("hello world") 可以省略的写成Println("hello world"),无闻的视频上建议不要使用这样的方式,可读性太差
+
+-import(f"fmt")
+别名操作的话调用包函数时前缀变成了 我们的前缀， 即f.Println("hello world"),个人不喜欢这种方式,好好的系统包调用名字你给改了,其他人读代码多不爽
+
+-import (
+"database/sql"
+_"github.com/ziutek/mymysql/godrv"//<----很重要 感谢天感谢地可算知道这破玩意是啥意思了
+)
+_操作其实是引入该包，而不直接使用包里面的函数， 而是调用了该包里面的init函数
