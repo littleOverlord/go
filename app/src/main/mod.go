@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"example/lissajous"
+	_"example/lissajous"
 )
 
 
