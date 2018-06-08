@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	var a int8 = ^120
-	fmt.Printf("%08b\n",a)
-
+	var a int = 122
+	fmt.Println(a&1)
+	Test();
 // 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
 // 		err := router.Distribute(w,r)
 // 		if(err != nil){

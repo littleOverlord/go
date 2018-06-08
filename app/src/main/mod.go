@@ -1,9 +1,7 @@
 package main
 
-import (
-	"fmt"
+import "fmt"
 
-	_"example/lissajous"
-)
-
-
+func Test(){
+	fmt.Println("Test the function working status from the diffrent file in the same package!");
+}
