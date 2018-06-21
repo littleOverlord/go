@@ -8,7 +8,7 @@ import (
 
 //%%%%%%%%%%%%%%%%%%%%% 导出
 
-type Handler func(w http.ResponseWriter, r *http.Request) error
+type Handler func(http.ResponseWriter, *http.Request) error
 
 //设置路由处理函数
 func Set(pattern string, handler Handler) (e error){
@@ -42,7 +42,7 @@ func Distribute(w http.ResponseWriter, r *http.Request) error{
 //%%%%%%%%%%%%%%%%%%%%% 本地函数
 
 //路由表
-var routers = make(map[string]Handler)
+var routers = make(map[string] Handler)
 //根目录
 var root string
 

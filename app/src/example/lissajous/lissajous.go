@@ -1,13 +1,13 @@
 package lissajous
 //%%%%%%%%%%%%%%%%%%%%% 导入
 import (
-	"io"
+	"fmt"
 	"image"
 	"image/color"
 	"image/gif"
 	"math"
 	"math/rand"
-	"os"
+	"net/http"
 
 	"router"
 )
@@ -16,12 +16,19 @@ import (
 //%%%%%%%%%%%%%%%%%%%%% 导出
 //初始化
 func init(){
-	router.Set("",OutGif)
-	fmt.Printf("package lissajous init ok!!!")
+	router.Set("",router.Handler(outGif))
+	fmt.Printf("package lissajous init ok!!!\n")
 }
 
+
+//%%%%%%%%%%%%%%%%%%%%% 本地函数
+var palette = []color.Color{color.White,color.Black}
+const(
+	whiteIndex = 0 //first color in palette
+	blackIndex = 1 //next color in palette
+)
 //输出图片
-func OutGif(out io.Writer){
+func outGif(out http.ResponseWriter, r *http.Request) error{
 	const(
 		cycles = 5 //number of complete x oscillator revolutions
 		res = 0.001 //angular resolution
@@ -44,12 +51,5 @@ func OutGif(out io.Writer){
 		anim.Delay = append(anim.Delay,delay)
 		anim.Image = append(anim.Image,img)
 	}
-	gif.EncodeAll(out, &anim) //NOTE: ignoring encoding errors
+	return gif.EncodeAll(out, &anim)
 }
-
-//%%%%%%%%%%%%%%%%%%%%% 本地函数
-var palette = []color.Color{color.White,color.Black}
-	const(
-		whiteIndex = 0 //first color in palette
-		blackIndex = 1 //next color in palette
-	)
