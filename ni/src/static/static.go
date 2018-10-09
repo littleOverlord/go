@@ -1,12 +1,16 @@
-package router
+package static
 
 //%%%%%%%%%%%%%%%%%%%%% 导入
 import (
-	"net/http"
+	"router"
 	"fmt"
 )
 
 //%%%%%%%%%%%%%%%%%%%%% 导出
+
+func main(){
+	router.Set()
+}
 
 type Handler func(w http.ResponseWriter, r *http.Request) error
 
