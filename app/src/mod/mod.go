@@ -7,4 +7,5 @@ import (
 
 func init(){
 	fmt.Println("mod module init!\n")
+	test()
 }

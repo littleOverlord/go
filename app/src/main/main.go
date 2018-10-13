@@ -11,7 +11,6 @@ import (
 func main() {
 	var a int = 122
 	fmt.Println(a&1)
-	test()
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
 		err := router.Distribute(w,r)
 		if(err != nil){
