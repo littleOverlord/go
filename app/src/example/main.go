@@ -11,7 +11,8 @@ func main()  {
 	fmt.Printf("goPath is %s\n", path)
 	//4.4.3
 	console()
-	//4.4.4 TODO.. 
+	//4.4.4 
+	vartest()
 }
 
 // console
@@ -21,4 +22,12 @@ func console(){
 	fmt.Printf("test Printf with a string: %s\n","like this!!")// test Printf with a string: like this!!
 	s := fmt.Sprintf("test Sprintf with a string: %s\n","like this!") //
 	fmt.Print("print s == ",s);// print s == test Sprintf with a string: like this!
+}
+
+// var
+func vartest(){
+	var a,b = "a","b"
+	//并行或同时赋值
+	a,b = b,a
+	fmt.Print("a == ",a,"b == ",b,"\n")
 }
