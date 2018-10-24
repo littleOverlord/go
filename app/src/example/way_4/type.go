@@ -1,6 +1,7 @@
 package main
 import (
 	"fmt"
+	"unicode/utf8"
 )
 
 type TZ int
@@ -42,4 +43,19 @@ func main(){
 	fmt.Printf("The value is: %v\n", c1)
 	fmt.Printf("The real of c1 is: %f\n", real(c1))
 	fmt.Printf("The imaginary of c1 is: %f\n", imag(c1))
+
+	var s string = "我是 int32 的别名i"
+	// var bn rune = rune(s)
+	bn1 ,size := utf8.DecodeRuneInString(s)
+	// fmt.Printf("%b\n",bn) 
+	fmt.Printf("%b %d\n",bn1,size) 
+
+	b1 := []byte(s)
+	fmt.Printf("%d,%b\n",len(b1),b1)
+
+	for len(b1) > 0{
+		r,si := utf8.DecodeRune(b1)
+		fmt.Printf("%c %v\n",r,si)
+		b1 = b1[si:]
+	}
 }

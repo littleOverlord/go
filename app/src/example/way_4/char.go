@@ -2,6 +2,7 @@ package main
 import (
 	"fmt"
 	"unicode"
+	"unicode/utf8"
 )
 
 func main(){
@@ -17,4 +18,13 @@ func main(){
 	fmt.Printf("%t\n",unicode.IsLetter(ch4))//是否为字母
 	fmt.Printf("%t\n",unicode.IsDigit(ch4))//是否为数字
 	fmt.Printf("%t\n",unicode.IsSpace(ch4))//是否为空白符
+	bc, rc := countCharacters("asSASA ddd dsjkdsjs dk")
+	fmt.Printf("byte_size=%d rune_size=%d\n",bc,rc)
+	bc1, rc1 := countCharacters("asSASA ddd dsjkdsjsこん dk")
+	fmt.Printf("byte_size=%d rune_size=%d\n",bc1,rc1)
+}
+
+func countCharacters(s string)(bc int,rc int){
+	r := []byte(s)
+	return len(r),utf8.RuneCount(r)
 }
