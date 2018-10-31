@@ -14,6 +14,12 @@ GOPATH = D:work\plugin;D:\work\project1;
 
 #### 3. 配置 GOROOT
 就是Go的根路径C:\Go\，类似Java_home
+### ubuntu
+vim ~/.bashrc
+添加
+export GOROOT=/usr/local/go
+export GOPATH=/home/taoyx/program_develop/go_demo
+export PATH=$PATH:$GOPATH:/usr/local/go/bin
 
 ## 工程结构
 一个GO工程中主要包含以下三个目录：

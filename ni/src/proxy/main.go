@@ -14,7 +14,7 @@ import (
 func main() {
     log.SetFlags(log.Ltime | log.Lshortfile)
     //监听1314端口
-    s, err := net.Listen("tcp", ":1314")
+    s, err := net.Listen("tcp", ":80")
     if err != nil {
         log.Panic(err)
     }
@@ -57,7 +57,7 @@ func proxy(client net.Conn) {
             addr = u.Path
         }
     }
-
+    fmt.Printf("address = %s\n",addr)
     //连接远程服务器
     s, err := net.Dial("tcp", addr)
     if err != nil {
