@@ -15,7 +15,7 @@ func main() {
     log.SetFlags(log.Ltime | log.Lshortfile)
     log.Println()
     //监听1314端口
-    s, err := net.Listen("tcp", ":8080")
+    s, err := net.Listen("tcp", ":80")
     if err != nil {
         log.Panic(err)
     }
