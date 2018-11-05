@@ -19,3 +19,8 @@
 * [segmentfault](segmentfault.com) 一个专门程序员提供的问答社区(ps:说谢谢不好的哟)
 * 微信公众号：架构师之路
  
+## 3.学习重点
+* array
+* linked list
+* hash table
+* binary tree
