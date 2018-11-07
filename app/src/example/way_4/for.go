@@ -10,6 +10,9 @@ func main(){
 	fmt.Println("goto ======================")
 	goto_loop()
 	fmt.Println()
+	for_test()
+	fmt.Println()
+	rect()
 }
 /**
 用标准的for循环
@@ -33,4 +36,43 @@ func goto_loop(){
 	}
 }
 
+/**
+测试 for循环内赋值
+**/
+func for_test(){
+	for i := 0; i < 5; i++{
+		var v int
+		fmt.Printf("%d",v)
+		v = 5
+	}
+	// for i := 0; ; i++{
+		// fmt.Println("Value of i is now: ", i)
+	// }
+	// for i := 0; i < 3;{
+	// 	fmt.Println("Value of i: ",i)
+	// }
 
+	s := ""
+	for ; s != "aaaaa";{
+		fmt.Println("Value of s: ",s)
+		s = s + "a"
+	}
+
+	for i, j, s := 0, 5, "a"; i < 3 && j < 100 && s != "aaaaa"; 
+		i, j, s = i + 1, j + 1, s + "a"{
+			fmt.Println("Value of i , j, s : ",i ,j ,s)
+	}
+}
+
+/**
+rectangle stars 20 * 10
+**/
+func rect(){
+	w, h := 20, 10
+	for x := 0; x < h; x++ {
+		for y := 0; y < w; y++{
+			fmt.Printf("*")
+		}
+		fmt.Println()
+	}
+}
