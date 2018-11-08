@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>Beego</title>
+  <title>闲趣</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link rel="shortcut icon" href="" type="image/x-icon" />
 
@@ -75,9 +75,9 @@
 
 <body>
   <header>
-    <h1 class="logo">Welcome to Beego</h1>
+    <h1 class="logo">欢迎来到闲趣</h1>
     <div class="description">
-      Beego is a simple & powerful Go web framework which is inspired by tornado and sinatra.
+      网站建设中...
     </div>
   </header>
   <footer>
