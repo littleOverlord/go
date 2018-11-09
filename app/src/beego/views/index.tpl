@@ -60,6 +60,9 @@
       color: #444;
       text-decoration: none;
     }
+    a:hover{
+      text-decoration:underline;
+    }
 
     .backdrop {
       position: absolute;
@@ -69,6 +72,9 @@
       z-index: -1;
       top: 0px;
       left: 0px;
+    }
+    .copy_right{
+      margin-right:10px;
     }
   </style>
 </head>
@@ -82,11 +88,9 @@
   </header>
   <footer>
     <div class="author">
-      Official website:
-      <a href="http://{{.Website}}">{{.Website}}</a> /
-      Contact me:
-      <a class="email" href="mailto:{{.Email}}">{{.Email}}</a>
+      联系我: <a class="email" href="mailto:{{.Email}}">{{.Email}}</a>
     </div>
+    <div><span class="copy_right">© 2017-2019 <a href="http://{{.Website}}">{{.Website}}</a> 版权所有</span><span>蜀ICP备17043385号-1</span></div>
   </footer>
   <div class="backdrop"></div>
 
