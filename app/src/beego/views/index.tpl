@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>闲趣</title>
+  <title>我的生活日记</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link rel="shortcut icon" href="" type="image/x-icon" />
 
@@ -81,9 +81,9 @@
 
 <body>
   <header>
-    <h1 class="logo">欢迎来到闲趣</h1>
+    <h1 class="logo">欢迎来到我的生活日记</h1>
     <div class="description">
-      网站建设中...
+      每天都很有趣，每天都很快乐！
     </div>
   </header>
   <footer>
