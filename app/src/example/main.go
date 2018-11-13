@@ -15,6 +15,7 @@ func main()  {
 	vartest()
 	//4.5.2
 	bitOperation()
+	
 }
 
 // console
@@ -65,14 +66,3 @@ func bitOperation(){
 	fmt.Print("Active = ",Active,"\nSend = ",Send,"\nReceive = ",Receive,"\nflag = ",flag,"\n") 
 }
 
-var AC A
-type A struct{Name string}
-
-func (a A)GetName()string{
-	return a.Name
-}
-
-func (a A)SetName(name string)error{
-	a.Name = name
-	return nil
-}

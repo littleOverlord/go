@@ -24,7 +24,7 @@ func main(){
 	fmt.Printf("%s %p\n",*sP, sP) 
 
 	var p *int
-	// p = &i1
+	p = &i1
 	//对一个空指针的反向引用是不合法的，并且会使程序崩溃：
 	fmt.Printf("%p %d\n",p,*p)
 }
