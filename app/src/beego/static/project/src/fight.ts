@@ -2,17 +2,17 @@
  * class
  */
 class Fighter{
-    public name: string
-    public id: number
-    public camp: number
-    public speed: number
-    /**
-     * fight attributes
-     */
-    public hp: number
-    public maxHp: number
-    public attack: number
-    public attackSpeed: number
+    public name: string        = ""
+    public id: number          = 0
+    public camp: number        = 0
+    public speed: number       = 0
+    // fight attributes
+    public hp: number          = 0
+    public maxHp: number       = 0
+    public attack: number      = 0
+    public attackSpeed: number = 10
+    // runtime attributes
+    public prevAttack: number  = 0
 }
 class Map{
     private _size: number = 0
@@ -54,5 +54,11 @@ class Scene{
      */
     public insert(f: Fighter){
         this.fighters.set(this.fid++,f);
+    }
+    //主循环
+    public loop(){
+        this.fighters.foreach((f: Fighter,k: string)=>{
+            
+        });
     }
 }
