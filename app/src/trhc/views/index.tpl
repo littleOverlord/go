@@ -12,12 +12,35 @@
   <header class="top">
     <div class="warp">
       <h1 class="logo">泰瑞合成</h1>
-      <div class="description">
-        每天我都在成长，希望大家跟我一起成长...
-      </div>
+      <ul class="nav">
+        <li class="curr" data-nav="index">首页</li>
+        <li data-nav="info">公司概况</li>
+        <li data-nav="service">服务介绍</li>
+        <li data-nav="advantage">核心优势</li>
+        <li data-nav="join">加入我们</li>
+        <li data-nav="cantact">联系我们</li>
+      </ul>
     </div>
   </header>
-  <footer>
+  <div class="content" data-content="index">
+
+  </div>
+  <div class="content" data-content="info">
+
+  </div>
+  <div class="content" data-content="service">
+
+  </div>
+  <div class="content" data-content="advantage">
+
+  </div>
+  <div class="content" data-content="join">
+
+  </div>
+  <div class="content" data-content="cantact">
+
+  </div>
+  <footer class="footer">
     <div class="author">
       联系我: <a class="email" href="mailto:{{.Email}}">{{.Email}}</a>
     </div>

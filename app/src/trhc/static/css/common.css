@@ -10,6 +10,9 @@
     line-height: 20px;
     background-color: #fff;
   }
+  li{
+    list-style: none;
+  }
 
   .warp{margin:0 auto;width:960px;height:auto;}
 
@@ -19,11 +22,41 @@
     top:0;
     left:0;
     width: 100%;
+    min-width: 960px;
     height:70px;
-    background-color:rgba(0,0,0, .5);
+    background-color:rgba(0,0,0, .6);
   }
+  .footer{
+    width: 100%;
+    min-width: 960px;
+    height:40px;
+    border-top: 1px solid #bbb;
+    line-height: 40px;
+    color: #ccc;
+  }
+
   .logo{
+    float: left;
     line-height: 70px;
     font-size:30px;
     color:#fff;
+  }
+  .nav{
+    float: right;
+  }
+  .nav li{
+    float: left;
+    width:100px;
+    height:70px;
+    line-height: 70px;
+    font-size:14px;
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+  }
+  .nav li:hover{
+    background-color: rgba(255,255,255,.1);
+  }
+  .nav .curr{
+    background-color: rgba(0,0,0,.2);
   }
