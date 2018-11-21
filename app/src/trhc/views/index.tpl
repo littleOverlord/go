@@ -22,31 +22,29 @@
       </ul>
     </div>
   </header>
-  <div class="content" data-content="index">
+  <div class="content index" data-content="index" style="display:none;">
 
   </div>
-  <div class="content" data-content="info">
+  <div class="content" data-content="info" style="display:none;">
 
   </div>
-  <div class="content" data-content="service">
+  <div class="content" data-content="service" style="display:none;">
 
   </div>
-  <div class="content" data-content="advantage">
+  <div class="content" data-content="advantage" style="display:none;">
 
   </div>
-  <div class="content" data-content="join">
+  <div class="content" data-content="join" style="display:none;">
 
   </div>
-  <div class="content" data-content="cantact">
+  <div class="content" data-content="cantact" style="display:none;">
 
   </div>
   <footer class="footer">
-    <div class="author">
-      联系我: <a class="email" href="mailto:{{.Email}}">{{.Email}}</a>
-    </div>
-    <div><span class="copy_right">© 2017-2019 <a href="http://{{.Website}}">{{.Website}}</a> 版权所有</span><span>蜀ICP备17043385号-2</span></div>
+    <span class="copy_right">© 2017-2019 <a href="http://{{.Website}}">{{.Website}}</a> 版权所有</span><span>蜀ICP备17043385号-2</span></div>
   </footer>
 
   <script src="/static/js/jquery.3.3.1.js"></script>
+  <script src="/static/js/common.js"></script>
 </body>
 </html>
