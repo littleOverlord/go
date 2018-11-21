@@ -23,7 +23,7 @@
     </div>
   </header>
   <div class="content index" data-content="index" style="display:none;">
-
+    <h4 class="index_t">专注肿瘤的临床试验现场管理组织</h4>
   </div>
   <div class="content" data-content="info" style="display:none;">
 
