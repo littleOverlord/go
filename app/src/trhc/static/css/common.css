@@ -23,7 +23,10 @@
   }
 
   .warp{margin:0 auto;width:960px;height:auto;}
-
+  .content{
+    width: 100%;
+    height: auto;
+  }
 
   .top{
     position: fixed;
@@ -95,4 +98,8 @@
     height:50px;line-height:50px;
     text-align: center;
     font-size:40px;color: #fff;
+  }
+
+  .introduce{
+
   }
