@@ -26,4 +26,18 @@ var tabControler = function(now,curr){
     con[now].show();
     nav[now].addClass(curr);
 }
+var resize = function(){
+    var body = $(document.body),
+        w = document.body.clientWidth || document.documentElement.clientWidth,
+        h = document.body.clientHeight || document.documentElement.clientHeight,
+        s = w/1000;
+    if(s<1){
+        s = s<1 && s >0.6?s:0.6;
+        body.attr("style","font-size:"+s*20+"px;");
+    }else{
+        body.attr("style","font-size:20px;");
+    }
+}
 tabControler("index","curr");
+resize();
+window.addEventListener("resize",resize);

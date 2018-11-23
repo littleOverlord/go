@@ -2,13 +2,15 @@
 
 <html>
 <head>
-  <title>我的编程成长</title>
+  <title>泰瑞合成官网</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" id="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
   <link rel="shortcut icon" href="" type="image/x-icon" />
   <link rel="stylesheet" href="/static/css/common.css">
 </head>
 
 <body>
+  <div class="bg bg_1"></div>
   <header class="top">
     <div class="warp">
       <h1 class="logo">泰瑞合成</h1>
@@ -20,27 +22,31 @@
         <li data-nav="join">加入我们</li>
         <li data-nav="cantact">联系我们</li>
       </ul>
+      <div class="m_nav">
+
+      </div>
     </div>
   </header>
-  <div class="content index" data-content="index" style="display:none;">
-    <h4 class="index_t">专注肿瘤的临床试验现场管理组织</h4>
+  <div class="index" data-content="index">
+    <h4 class="warp index_t">医学的未来从这里开始</h4>
   </div>
-  <div class="content" data-content="info" style="display:none;">
+  <div class="warp info" data-content="info">
+    <div class="info_ban"></div>
     <div class="introduce">
-      比逊（MedPISOn）成立于2014年，是一家专注于肿瘤领域的创新型临床研究现场管理组织（Site Management Organization）
-比逊 （MedPISOn, Professional Investigator Support for Oncology）依托强大的肿瘤数据平台、丰富的肿瘤专家资源、系统专业培训及严格的质量管理体系，为肿瘤临床试验提供优质临床研究协调员服务，协助肿瘤领域研究者和研究机构开展临床试验，提高临床研究的质量和效率，推动临床研究的规范化进程。
+      <h3>泰瑞合成成立于2018年，是一家专注于肿瘤领域的创新型临床研究现场管理组织（Site Management Organization）</h3>
+      <p>依托强大的肿瘤数据平台、丰富的肿瘤专家资源、系统专业培训及严格的质量管理体系，为肿瘤临床试验提供优质临床研究协调员服务，协助肿瘤领域研究者和研究机构开展临床试验，提高临床研究的质量和效率，推动临床研究的规范化进程。</p>
     </div>
   </div>
-  <div class="content" data-content="service" style="display:none;">
+  <div class="warp" data-content="service">
 
   </div>
-  <div class="content" data-content="advantage" style="display:none;">
+  <div class="warp" data-content="advantage">
 
   </div>
-  <div class="content" data-content="join" style="display:none;">
+  <div class="warp" data-content="join">
 
   </div>
-  <div class="content" data-content="cantact" style="display:none;">
+  <div class="warp" data-content="cantact">
 
   </div>
   <footer class="footer">
@@ -48,6 +54,6 @@
   </footer>
 
   <script src="/static/js/jquery.3.3.1.js"></script>
-  <script src="/static/js/common.js"></script>
+  <script src="/static/js/common.js?15"></script>
 </body>
 </html>
