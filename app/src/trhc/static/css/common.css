@@ -9,6 +9,7 @@
     margin: 0px;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 20px;
+    color:#737373;
     background-color: #fff;
   }
   li{
@@ -16,7 +17,7 @@
   }
 
   a{
-    color:#000;
+    color:#737373;
     text-decoration: none;
   }
   a:hover{
@@ -34,9 +35,8 @@
     left: 0;
     top: 0;
     width: 100%;
-    height:3.5rem;
-    background-color:#182226;
-    border-bottom: 1px solid #344850;
+    height:4.5rem;
+    background-color:#fff;
   }
   .footer{
     width: 100%;
@@ -54,21 +54,20 @@
     z-index: -1;
   }
   .bg_1{
-    top:3.5rem;
+    top:4.5rem;
     height: 30rem;
-    background-color: #323232;
-    background-image: url(../images/index_banner.png);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center center;
+    background-color: #23628b;
+    background-image: url(/static/images/ban.png);
+    background-repeat: repeat;
+    background-size: contain;
   }
 
   .logo{
     padding-left:.5em;
     float: left;
-    line-height: 3.5rem;
+    line-height: 4.5rem;
     font-size:1.5rem;
-    color:#fff;
+    color:#3bb5ee;
   }
   .nav{
     float: right;
@@ -79,21 +78,27 @@
     height:3.5rem;
     line-height: 3.5rem;
     font-size:0.8rem;
-    color: #fff;
     font-weight: bold;
     text-align: center;
   }
   .nav li:hover{
-    background-color: #344850;
+    color:#fff;
+    background-color: #2fbcf8;
   }
   .nav .curr{
-    background-color: #253339;
+    color:#fff;
+    background-color: #3ab5e9;
+    border-bottom:1rem solid #37a2d4;
   }
 
   .index{
-    margin-top:3.5rem;
+    margin-top:4.5rem;
     width: 100%;
     height:30rem;
+    background-image: url(/static/images/banner.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: left center;
   }
   .index_t{
     width:100%;
@@ -109,9 +114,17 @@
   }
 
   .info{
-    height:30rem;
-    background-color: #fff;
+    height:auto;
+    background-color: #f2f3f7;
   }
+  .info::after{
+    content: "";
+    display: block;
+    clear: both;
+  }
+
+  .info_ban{float:left;}
+  .info_ban svg{width: 30rem;height:33rem;}
 
   @media screen and (max-width:700px){
   .nav {
@@ -127,5 +140,8 @@
   }
   .m_nav{
     display: none;
+  }
+  .index_t{
+    text-indent: 25rem;
   }
 }

@@ -30,7 +30,7 @@
   <div class="index" data-content="index">
     <h4 class="warp index_t">医学的未来从这里开始</h4>
   </div>
-  <div class="warp info" data-content="info">
+  <div class="content info" data-content="info">
     <div class="info_ban"></div>
     <div class="introduce">
       <h3>泰瑞合成成立于2018年，是一家专注于肿瘤领域的创新型临床研究现场管理组织（Site Management Organization）</h3>
