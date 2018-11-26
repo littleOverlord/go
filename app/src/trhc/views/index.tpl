@@ -19,7 +19,6 @@
         <li class="curr" data-nav="index">首页</li>
         <li data-nav="info">公司概况</li>
         <li data-nav="service">服务介绍</li>
-        <li data-nav="advantage">核心优势</li>
         <li data-nav="join">加入我们</li>
         <li data-nav="cantact">联系我们</li>
       </ul>
@@ -62,18 +61,33 @@
             <dd>❻ 试验标本的管理</dd>
           </dl>
         </div>
+        <h3 class="p_title">合作伙伴</h3>
         <ul class="partner">
-          <li></li>
+          <li style="background-image:url(/static/images/Asus-Logo-PNG-Downlo.png)" title="Asus"></li>
+          <li style="background-image:url(/static/images/BioTime-logo-sq.png)" title="BioTime"></li>
+          <li style="background-image:url(/static/images/4215727.png)" title="life"></li>
         </ul>
     </div>
   </div>
-  <div class="warp" data-content="advantage">
-
+  <div class="join" data-content="join">
+      <div class="content">
+          <h2 class="title">加入我们</h2>
+          <dl class="fuli">
+            <dt>福利待遇</dt>
+            <dd>比逊公司秉持以人为本，关爱员工，重视员工的薪酬与福利，为员工提供了餐费、通讯、加班补贴以及六险一金等完善的福利保障。</dd>
+            <dd style="color:#3cb4ee;">节日福利 | 结婚生子礼金 | 暖亲礼金 | 福利年假 | 长期激励计划 | 补充商业保险</dd>
+            <dt>岗位</dt>
+            <dd>临床研究协调员CRC</dd>
+            <dd>临床协调经理CRCM</dd>
+            <dd>临床研究项目经理 PM</dd>
+            <dd>临床研究质控经理QA</dd>
+            <dd>商务经理BD</dd>
+            <dt>简历投递</dt>
+            <dd>邮箱：trhcmed@163.com</dd>
+          </dl>
+      </div>
   </div>
-  <div class="warp" data-content="join">
-
-  </div>
-  <div class="warp" data-content="cantact">
+  <div class="cantact" data-content="cantact">
 
   </div>
   <footer class="footer">
