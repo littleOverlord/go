@@ -88,7 +88,17 @@
       </div>
   </div>
   <div class="cantact" data-content="cantact">
-
+    <div class="content">
+      <h2 class="title">联系我们</h2>
+      <dl class="fuli">
+          <dt>地址</dt>
+          <dd>四川省成都市青羊区顺城大街269号富力中心B座1302</dd>
+          <dt>联系电话</dt>
+          <dd>028-82655656</dd>
+          <dd>13885858585</dd>
+        </dl>
+      <div class="map" id="allmap"></div>
+    </div>
   </div>
   <footer class="footer">
     <span class="copy_right">© 2017-2019 <a href="http://{{.Website}}">{{.Website}}</a> 版权所有</span><span>蜀ICP备17043385号-2</span></div>
