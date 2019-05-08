@@ -2,7 +2,7 @@
 # 配置
 ###
 basepath=$(pwd)
-basepath=${basepath%back*}
+basepath=${basepath%boot*}
 #数据库数据存放目录
 dbpath=""
 #数据库日志存放目录
@@ -19,7 +19,7 @@ if [ ! -d "db" ];
 then
 sudo mkdir db
 fi
-dbpath="${basepath}back/db"
+dbpath="${basepath}/db"
 # 检查创建db log目录
 if [ ! -d "log" ];
 then
@@ -30,7 +30,7 @@ then
 cd log
 sudo touch mongodb.log
 fi
-logpath="${basepath}/back/log/mongodb.log"
+logpath="${basepath}log/mongodb.log"
 echo "dbpath=$dbpath logpath=$logpath port=$port bind_ip=$bind_ip"
 # 启动mongodb
 sudo mongod --dbpath=$dbpath --logpath=$logpath --logappend --port=$port --bind_ip=$bind_ip
