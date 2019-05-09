@@ -53,3 +53,19 @@ import "shortcut/model" //<--加载gopath/src/shortulr/model模块
 _"github.com/ziutek/mymysql/godrv"//<----很重要 感谢天感谢地可算知道这破玩意是啥意思了
 )
 _操作其实是引入该包，而不直接使用包里面的函数， 而是调用了该包里面的init函数
+
+## 任务
+
+### 日志
+
+    分三类：error info warn
+    写入文件名：2019-05-09.error 2019-05-09.info 2019-05-09.warn
+    文件内容包括：日期、信息描述、调用堆栈
+
+### 配置读取
+
+### http服务
+
+### websocket服务
+
+### mongodb数据库
