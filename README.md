@@ -58,9 +58,13 @@ _操作其实是引入该包，而不直接使用包里面的函数， 而是调
 
 ### 日志
 
+    目录：src/ni/logger
     分三类：error info warn
     写入文件名：2019-05-09.error 2019-05-09.info 2019-05-09.warn
     文件内容包括：日期、信息描述、调用堆栈
+
+#### 注意事项
+    1、path(包)，路径规则必须按Unix环境为准，需要兼容windows需要filepath.ToSlash( path/filepath )转换
 
 ### 配置读取
 

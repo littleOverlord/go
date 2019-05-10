@@ -18,8 +18,5 @@ func TestErrorlog(t *testing.T){
 }
 
 func errorLog(t *testing.T, msg string){
-	err := Error(msg)
-	if err != nil {
-		t.Errorf("Unexpected error: (%T)%v", err, err)
-	}
+	Error(msg)
 }

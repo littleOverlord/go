@@ -6,18 +6,18 @@ import (
 	"fmt"
 	"time"
 	"runtime"
+	"path"
+	"ni/util"
 )
 
 //写入错误日志
-func Error(content string) error {
-	var name string
-	var err error
+func Error(content string) {
 	var buf [1024]byte
-	name = fileName(LOGTYPE.Error)
-	n := runtime.Stack(buf[:], true)
-	fmt.Println(n)
-    err = append(name,[]byte("\n" + time.Now().String() + "\n" + content + "\n" + string(buf[:]) + "\n====================================================\n"),0777)
-    return err
+	name := fileName(LOGTYPE.Error)
+	runtime.Stack(buf[:], true)
+	s := fmt.Sprintf("\n%s\n%s\n%s\n====================================================\n",time.Now().String(),content,string(buf[:]))
+    err := append(name,[]byte(s),0777)
+    fmt.Println(err)
 }
 //log类型
 var LOGTYPE = &struct {
@@ -45,5 +45,7 @@ func append(fileName string, data []byte, perm os.FileMode) error {
 func fileName(_type string) string {
 	current := time.Now()
 	t := current.Format("2006-01-02")
-	return t + "." + _type
+	logPath := path.Join("back","log")
+	filePath := path.Join(util.WorkSpace,logPath)
+	return filePath + "/" + t + "." + _type
 }

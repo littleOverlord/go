@@ -5,20 +5,30 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"fmt"
 	"path/filepath"
+
+	"ni/logger"
+	"ni/util"
 )
 
 var Table map[string]interface{}
 
-func LoadConfig() {
-	currentPath, err := os.Getwd()
-	if err != nil {
-		beeLogger.Log.Error(err.Error())
-	}
+func init(){
+	defer func(){
+		if p := recover(); p != nil {
+			fmt.Println(p)
+        }
+	}()
+	loadConfig()
+}
 
-	dir, err := os.Open(currentPath)
+func loadConfig() {
+	appAbs := appPath()
+
+	dir, err := os.Open(appAbs)
 	if err != nil {
-		beeLogger.Log.Error(err.Error())
+		panic("loadConfig error : " + err.Error())
 	}
 	defer dir.Close()
 
@@ -62,4 +72,10 @@ func LoadConfig() {
 	if len(Conf.DirStruct.Models) == 0 {
 		Conf.DirStruct.Models = "models"
 	}
+}
+// 获取app绝对路径
+func appPath() string{
+	relAppPath := path.Join("src","app")
+	path := path.Join(util.WorkSpace,relAppPath)
+	return path
 }

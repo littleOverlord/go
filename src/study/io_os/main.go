@@ -5,17 +5,20 @@ import (
 	"os"
 	"time"
 	"path"
+	"path/filepath"
+	"strings"
 	_"io/ioutil"
 )
 
 func main() {
 	currentPath, err := os.Getwd()
-	workspace := path.Join("ni","config")
-	path.Dir()
+	absWK := path.Join("src","study","io_os")
+	workspace := path.Dir(strings.Replace(filepath.ToSlash(currentPath),absWK,"",1))
+	
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(currentPath)
+	fmt.Println(path.Clean(currentPath),path.Clean(absWK),strings.Replace(currentPath,absWK,"",1),workspace,filepath.ToSlash(currentPath))
 }
 //写入错误日志
 func Error(content string) error {
