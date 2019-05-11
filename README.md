@@ -15,14 +15,14 @@ GOPATH = D:work\plugin;D:\work\project1;
 #### 3. 配置 GOROOT
 就是Go的根路径C:\Go\，类似Java_home
 ### linux
-vim ~/.bashrc
-or 
-vim ~/.bash_profile
-添加
-export GOROOT=/usr/local/go
-export GOPATH=/home/taoyx/program_develop/go_demo
-export PATH=$PATH:$GOPATH:/usr/local/go/bin
-
+vim ~/.bashrc<br />
+or <br />
+vim ~/.bash_profile<br />
+添加<br />
+export GOROOT=/usr/local/go<br />
+export GOPATH=/home/taoyx/program_develop/go_demo<br />
+export PATH=$PATH:$GOPATH:/usr/local/go/bin<br />
+<br />
 source ~/.bash_profile 立即生效
 ## 工程结构
 一个GO工程中主要包含以下三个目录：
