@@ -7,8 +7,8 @@
             "port":80
         },
         "https":{
-            "key":"ni/server/key/2122658_mgame.xianquyouxi.com.key",
-            "crt":"ni/server/key/2122658_mgame.xianquyouxi.com.pem",
+            "key":"app/tls/2122658_mgame.xianquyouxi.com.key",
+            "crt":"app/tls/2122658_mgame.xianquyouxi.com.pem",
             "port": 443
         }
     },
