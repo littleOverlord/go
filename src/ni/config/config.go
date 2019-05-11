@@ -6,76 +6,76 @@ import (
 	"io/ioutil"
 	"os"
 	"fmt"
-	"path/filepath"
+	"path"
+	_"path/filepath"
 
-	"ni/logger"
+	_"ni/logger"
 	"ni/util"
 )
-
-var Table map[string]interface{}
-
+// 配置缓存表
+var Table map[string]interface{} = make(map[string]interface{})
+// 源码目录
+var srcAbs string
 func init(){
 	defer func(){
 		if p := recover(); p != nil {
 			fmt.Println(p)
         }
 	}()
-	loadConfig()
+	srcAbs = srcPath()
+	loadConfig("app")
 }
+// 读取某个目录下的json
+func loadConfig(rd string) {
+	absDir := path.Join(srcAbs,rd)
 
-func loadConfig() {
-	appAbs := appPath()
-
-	dir, err := os.Open(appAbs)
+	dir, err := os.Open(absDir)
 	if err != nil {
-		panic("loadConfig error : " + err.Error())
+		panic("loadConfig os.Open error : " + err.Error())
 	}
 	defer dir.Close()
 
 	files, err := dir.Readdir(-1)
 	if err != nil {
-		beeLogger.Log.Error(err.Error())
+		panic("loadConfig Readdir error : " + err.Error())
 	}
-
+	fmt.Println(len(files))
 	for _, file := range files {
-		switch file.Name() {
-		case "bee.json":
-			{
-				err = parseJSON(filepath.Join(currentPath, file.Name()), &Conf)
-				if err != nil {
-					beeLogger.Log.Errorf("Failed to parse JSON file: %s", err)
-				}
-				break
+		fmt.Println(file.Name())
+		if util.IsDir(path.Join(absDir,file.Name())) {
+			loadConfig(path.Join(rd,file.Name()))
+		} else if(path.Ext(file.Name()) == ".json"){
+			var conf interface{}
+			err = parseJSON(path.Join(absDir,file.Name()),&conf)
+			if err != nil {
+				panic("loadConfig parseJSON error : " + err.Error())
 			}
-		case "Beefile":
-			{
-				err = parseYAML(filepath.Join(currentPath, file.Name()), &Conf)
-				if err != nil {
-					beeLogger.Log.Errorf("Failed to parse YAML file: %s", err)
-				}
-				break
-			}
+			fmt.Println(path.Join(rd,file.Name()),conf)
+			Table[path.Join(rd,file.Name())] = conf
 		}
 	}
 
-	// Check format version
-	if Conf.Version != confVer {
-		beeLogger.Log.Warn("Your configuration file is outdated. Please do consider updating it.")
-		beeLogger.Log.Hint("Check the latest version of bee's configuration file.")
-	}
-
-	// Set variables
-	if len(Conf.DirStruct.Controllers) == 0 {
-		Conf.DirStruct.Controllers = "controllers"
-	}
-
-	if len(Conf.DirStruct.Models) == 0 {
-		Conf.DirStruct.Models = "models"
-	}
 }
 // 获取app绝对路径
-func appPath() string{
-	relAppPath := path.Join("src","app")
-	path := path.Join(util.WorkSpace,relAppPath)
-	return path
+func srcPath() string{
+	_path := path.Join(util.WorkSpace,"src")
+	return _path
+}
+// 读取文件并解析
+func parseJSON(p string, c interface{}) error {
+	file, err := os.Open(p)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(content,c)
+	if(err != nil){
+		return err
+	}
+	return nil
 }

@@ -14,7 +14,7 @@ GOPATH = D:work\plugin;D:\work\project1;
 
 #### 3. 配置 GOROOT
 就是Go的根路径C:\Go\，类似Java_home
-### ubuntu
+### linux
 vim ~/.bashrc
 or 
 vim ~/.bash_profile
@@ -68,7 +68,16 @@ _操作其实是引入该包，而不直接使用包里面的函数， 而是调
 
 ### 配置读取
 
-### http服务
+    目录：src/ni/config
+    配置类型：.json
+    缓存：Table map[string]interface{} key: src目录下的文件路径
+    获取：config.Table["app/main/config.json"]
+
+### http(s)服务
+
+#### 静态资源
+
+#### 路由
 
 ### websocket服务
 
