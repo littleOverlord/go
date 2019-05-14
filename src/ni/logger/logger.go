@@ -7,17 +7,26 @@ import (
 	"time"
 	"runtime"
 	"path"
+	"sync"
 	"ni/util"
 )
 
 //写入错误日志
 func Error(content string) {
-	var buf [1024]byte
-	name := fileName(LOGTYPE.Error)
-	runtime.Stack(buf[:], true)
-	s := fmt.Sprintf("\n%s\n%s\n%s\n====================================================\n",time.Now().String(),content,string(buf[:]))
-    err := append(name,[]byte(s),0777)
-    fmt.Println(err)
+	group.Add(1)
+	go func(){
+		// lock.Error.Lock()
+		// defer lock.Error.Unlock()
+		var buf [1024]byte
+		name := fileName(LOGTYPE.Error)
+		runtime.Stack(buf[:], true)
+		s := fmt.Sprintf("\n%s\n%s\n%s\n====================================================\n",time.Now().String(),content,string(buf[:]))
+		err := append(name,[]byte(s),0777)
+		if err != nil {
+			fmt.Println(err)
+		}
+		group.Done()
+	}()
 }
 //log类型
 var LOGTYPE = &struct {
@@ -29,9 +38,16 @@ var LOGTYPE = &struct {
 	Info : "info",
 	Warn : "warn",
 }
+// 写入锁
+var lock = &struct{
+	Error sync.Mutex
+	Info sync.Mutex
+	Warn sync.Mutex
+}{}
+var group = sync.WaitGroup{}
 //追加写入文件
 func append(fileName string, data []byte, perm os.FileMode) error {
-	// 以只写的模式，打开文件
+	// 以追加和创建的模式，打开文件
 	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE,perm)
 	if err != nil {
 		return err

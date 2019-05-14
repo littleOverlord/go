@@ -56,7 +56,7 @@ func loadConfig(rd string) {
 	}
 
 }
-// 获取app绝对路径
+// 获取src绝对路径
 func srcPath() string{
 	_path := path.Join(util.WorkSpace,"src")
 	return _path

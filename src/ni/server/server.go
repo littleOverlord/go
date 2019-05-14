@@ -3,50 +3,64 @@ package server
 
 import (
 	"fmt"
-	"os"
 	"path"
-	"path/filepath"
-	"regexp"
-)
-// 工作路径，即当前服务器的根路径
-var WorkSpace string
+	"time"
+	"net/http"
 
-func init(){
-	defer func(){
-		if p := recover(); p != nil {
-			fmt.Println(p)
-        }
-	}()
-	getWorkSpace()
-	
+	"ni/logger"
+	"ni/util"
+	"ni/router"
+)
+// 创建http(s)服务
+func Create(cfg map[string]interface{}){
+	port := cfg["http"].(map[string]interface{})["port"].(string)
+	fmt.Println("http")
+	if port != "" {
+		go func(p string){
+			err := httpServer(p)
+			if err != nil{
+				fmt.Println(err.Error()) 
+			}
+		}(port)
+	}
+	port = cfg["https"].(map[string]interface{})["port"].(string)
+	key := cfg["https"].(map[string]interface{})["key"].(string)
+	crt := cfg["https"].(map[string]interface{})["crt"].(string)
+	fmt.Println("https")
+	if port != "" {
+		go func(p string, key string, crt string){
+			time.Sleep(1000 * time.Microsecond)
+			err := httpsServer(p,key,crt)
+			if err != nil{
+				fmt.Println(err.Error()) 
+			}
+		}(port,key,crt)
+	}
+	select {}
 }
-// 获取工作路径
-func getWorkSpace(){
-	currentPath, err := os.Getwd()
-	reg := regexp.MustCompile(`src.*$`)
-	absWK := reg.ReplaceAllString(currentPath, "")
-	WorkSpace = path.Dir(filepath.ToSlash(absWK))
-	fmt.Println(currentPath,absWK,WorkSpace)
+// http(s)处理函数
+func handleFunc (w http.ResponseWriter, req *http.Request){
+	err := router.Distribute(w, req)
 	if err != nil {
-		panic("Get currentPath error by os.Getwd(), " + err.Error())
+		logger.Error(err.Error())
 	}
 }
-// 判断是否目录
-func IsDir(dirname string) bool  {
-    fhandler, err := os.Stat(dirname);
-    if(! (err == nil || os.IsExist(err)) ) {
-        return false
-    }else {
-        return fhandler.IsDir()
-    }
+// 创建htpp服务
+func httpServer(port string) error{
+	http.HandleFunc("/", handleFunc)
+	fmt.Println(":"+port)
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	return err
 }
-// 判断是否文件
-func IsFile(filename string) bool  {
-    fhandler, err := os.Stat(filename);
-    if(! (err == nil || os.IsExist(err)) ) {
-        return false
-    }else if (fhandler.IsDir()){
-        return false
-    }
-    return true
+// 创建htpps服务
+func httpsServer(port string, key string, crt string) error{
+	fmt.Println(":"+port, path.Join(util.WorkSpace,key), path.Join(util.WorkSpace,crt))
+	err := http.ListenAndServeTLS(":"+port, path.Join(util.WorkSpace,key), path.Join(util.WorkSpace,crt), nil)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	return err
 }

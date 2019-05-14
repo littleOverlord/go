@@ -4,12 +4,12 @@
     },
    "server":{
         "http":{
-            "port":80
+            "port":"80"
         },
         "https":{
-            "key":"app/tls/2122658_mgame.xianquyouxi.com.key",
-            "crt":"app/tls/2122658_mgame.xianquyouxi.com.pem",
-            "port": 443
+            "key":"src/app/tls/2122658_mgame.xianquyouxi.com.key",
+            "crt":"src/app/tls/2122658_mgame.xianquyouxi.com.pem",
+            "port": "443"
         }
     },
     "db":{
@@ -21,10 +21,10 @@
         }
     },
     "static": {
-        "dir":"static",
-        "default":"/index.html"
+        "dir":"htdocs",
+        "default":"index.html"
     },
     "log" : {
-        "dir":"../log"
+        "dir":"back/log"
     } 
 }

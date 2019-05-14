@@ -65,6 +65,7 @@ _操作其实是引入该包，而不直接使用包里面的函数， 而是调
 
 #### 注意事项
     1、path(包)，路径规则必须按Unix环境为准，需要兼容windows需要filepath.ToSlash( path/filepath )转换
+    2、文件写入加锁
 
 ### 配置读取
 
@@ -75,7 +76,14 @@ _操作其实是引入该包，而不直接使用包里面的函数， 而是调
 
 ### http(s)服务
 
+    目录：src/ni/server
+    http创建成功
+    https报错：failed to find certificate PEM data in certificate input, but did find a private key; PEM inputs may have been switched
+    似乎是证书有问题，等上传到外网服务器再测试
+
 #### 静态资源
+    
+    目录：src/ni/static
 
 #### 路由
 
