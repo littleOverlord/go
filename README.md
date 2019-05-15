@@ -84,8 +84,12 @@ _操作其实是引入该包，而不直接使用包里面的函数， 而是调
 #### 静态资源
     
     目录：src/ni/static
+    默认启用gzip压缩, {".png",".jpg",".gif",...}等压缩率低的资源不参与
+    不参与gzip压缩的资源，用http.ServeFile响应请求
 
 #### 路由
+
+    目录：src/ni/router
 
 ### websocket服务
 
