@@ -47,9 +47,10 @@ func handleFunc (w http.ResponseWriter, req *http.Request){
 }
 // 创建htpp服务
 func httpServer(port string) error{
-	http.HandleFunc("/", handleFunc)
 	fmt.Println(":"+port)
-	err := http.ListenAndServe(":"+port, nil)
+	mux := http.NewServeMux()
+    mux.HandleFunc("/", handleFunc)
+	err := http.ListenAndServe(":"+port, mux)
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -57,8 +58,10 @@ func httpServer(port string) error{
 }
 // 创建htpps服务
 func httpsServer(port string, key string, crt string) error{
+	mux := http.NewServeMux()
+    mux.HandleFunc("/", handleFunc)
 	fmt.Println(":"+port, path.Join(util.WorkSpace,key), path.Join(util.WorkSpace,crt))
-	err := http.ListenAndServeTLS(":"+port, path.Join(util.WorkSpace,key), path.Join(util.WorkSpace,crt), nil)
+	err := http.ListenAndServeTLS(":"+port, path.Join(util.WorkSpace,key), path.Join(util.WorkSpace,crt), mux)
 	if err != nil {
 		logger.Error(err.Error())
 	}
