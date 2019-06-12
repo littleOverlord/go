@@ -10,6 +10,12 @@
             "key":"src/app/tls/2122658_mgame.xianquyouxi.com.key",
             "crt":"src/app/tls/2122658_mgame.xianquyouxi.com.pem",
             "port": "443"
+        },
+        "ws":{
+            "port":"10101"
+        },
+        "wss":{
+            "port":"10102"
         }
     },
     "db":{

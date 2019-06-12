@@ -3,14 +3,15 @@ package websocket
 
 import (
 	"fmt"
-	"bytes"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
 
 	"ni/logger"
+	"ni/server"
 )
+
 const (
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
@@ -28,6 +29,10 @@ const (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	// 允许跨域
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 // Client is a middleman between the websocket connection and the hub.
@@ -47,7 +52,7 @@ type Client struct {
 // reads from this goroutine.
 func (c *Client) readPump() {
 	defer func() {
-		c.hub.unregister <- c
+		// c.hub.unregister <- c
 		c.conn.Close()
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
@@ -57,12 +62,13 @@ func (c *Client) readPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				logger.Error(err.Error())
 			}
 			break
 		}
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.hub.broadcast <- message
+		// message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		fmt.Println(message)
+		c.send <- message
 	}
 }
 
@@ -107,6 +113,7 @@ func (c *Client) writePump() {
 
 // serveWs handles websocket requests from the peer.
 func serveWs(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("socket start!")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logger.Error(err.Error())
@@ -121,6 +128,12 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	go client.readPump()
 }
 
-func Create(){
-
+// Create create websocket server
+func Create(cfg map[string]interface{}) {
+	go func(c map[string]interface{}) {
+		server.CreateSingle("ws", c, serveWs)
+	}(cfg)
+	go func(c map[string]interface{}) {
+		server.CreateSingle("wss", c, serveWs)
+	}(cfg)
 }
