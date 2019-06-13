@@ -1,26 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
 	
-	"router"
-	_"mod"
+	"ni/config"
+	"ni/server"
 )
 
 func main() {
-	var a int = 122
-	fmt.Println(a&1)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
-		err := router.Distribute(w,r)
-		if(err != nil){
-			fmt.Println(r.URL.Path,err.Error())
-		}
-   })
-	http.ListenAndServe(":1224",nil)
+	cfg := config.Table["app/main/config.json"].(map[string]interface{})["server"].(map[string]interface{})
+	server.Create(cfg)
+	select{}
 }
-// import "github.com/astaxie/beego"
-
-// func main(){
-// 	beego.Run()
-// }
