@@ -9,7 +9,7 @@ body {
   margin: 0px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 20px;
-  color:#737373;
+  color:#333333;
   background-color: #fff;
 }
 li{
@@ -17,7 +17,7 @@ li{
 }
 
 a{
-  color:#737373;
+  color:#333333;
   text-decoration: none;
 }
 a:hover{
@@ -65,37 +65,110 @@ a:hover{
 }
 
 .top{
+  position: fixed;
+  top: 0;
+  left:0;
+  z-index: 10;
   width: 100%;
   height:3rem;
-  font-size: 1rem;
   line-height: 3rem;
   background-color:#fff;
   box-shadow: 0px 0px .5rem rgba(0, 0, 0, .2);
 }
 
-.nav,.nav dt,.nav dd{
+.nav li,.logo,.tag,.tag dd,.ei_l{
   float: left;
 }
-.nav dd{
-  padding:0 .25rem;
+.logo{
+  width: 7rem;
+  text-align: center;
+  background-color: #ffcc00;
+  color: #fff;
+  font-size: 2rem;
 }
-.nav dt{
-  padding-right: .25rem;
+.nav{
+  float: right;
+}
+.nav li{
+  padding:0 .4rem;
+  font-size: .8rem;
+}
+
+.tag{
+  margin-left:1rem;
+  margin-top:.3rem;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: .2rem 0;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.tag dd{
+  height: 2rem;
+  line-height: 2rem;
+  margin-left:.2rem;
+  border: 1px solid #f4f5f5;
+}
+
+.tag dd.curr a{
   color: #ffcc00;
 }
-
-.contact{
-  float: right;
-  
+.tag dd a{
+  display: block;
+  padding: 0 .4rem;
+}
+.essay_list{
+  padding-top:3.4rem;
+  padding-bottom: 2rem;
 }
 
+.essay_i{
+  margin-top:1px;
+  padding:1.5rem;
+  background-color: #fff;
+  overflow: hidden;
+}
+.essay_i:hover{
+  background-color: rgb(250, 250, 250);
+  cursor: pointer;
+}
+
+.ei_info{
+  color: #b2bac2;
+  font-size: 0.8rem;
+  line-height: 1rem;
+}
+.ei_title{
+  font-size: 1.5rem;
+  line-height: 3rem;
+}
+.ei_tag{
+  overflow: hidden;
+}
+.ei_tag li{
+  float: left;
+  margin-right:.3rem;
+  padding:0 .3rem;
+  font-size: .8rem;
+  line-height:2rem;
+  border:1px solid #f4f5f5;
+}
+.ei_tag li:hover{
+  color: #ffcc00;
+}
 .footer{
+  position: fixed;
+  bottom: 0;
+  left:0;
+  z-index: 10;
   width: 100%;
   height:2rem;
   border-top: 1px solid #ccc;
   font-size:0.6rem;
   line-height: 2rem;
   text-align: center;
+  background-color: #fff;
 }
 
 
