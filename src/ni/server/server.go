@@ -60,6 +60,9 @@ func handleFunc(w http.ResponseWriter, req *http.Request) {
 // 创建http服务
 func httpServer(scheme string, cfg map[string]interface{}, hf httpHandleFunc) error {
 	port := cfg[scheme].(map[string]interface{})["port"].(string)
+	if port == "0" {
+		return nil
+	}
 	fmt.Println(":" + port)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hf)
@@ -72,7 +75,11 @@ func httpServer(scheme string, cfg map[string]interface{}, hf httpHandleFunc) er
 
 // 创建htpps服务
 func httpsServer(scheme string, cfg map[string]interface{}, hf httpHandleFunc) error {
+
 	port := cfg[scheme].(map[string]interface{})["port"].(string)
+	if port == "0" {
+		return nil
+	}
 	tlsKey := cfg["https"].(map[string]interface{})["key"].(string)
 	tlsCrt := cfg["https"].(map[string]interface{})["crt"].(string)
 	mux := http.NewServeMux()
