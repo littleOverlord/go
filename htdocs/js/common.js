@@ -1,43 +1,8 @@
 var modules = {};
 (function(){
     var exports = modules["common"] = {};
-    var nav,con,nowNav,currClass,clientWidth,clientHeight,timer;
-    var ElsByAttr = function(keys){
-        var r = {};
-        for(var i = 0,len = keys.length; i < len; i++){
-            var nodes = $("["+keys[i]+"]");
-            nodes.each(function(k,v){
-                r[nodes.eq(k).attr(keys[i])] = {
-                    node: nodes.eq(k)
-                }
-            });
-        }
-        return r;
-    };
-    var tabControler = function(now,curr){
-        nav = ElsByAttr(["data-nav"]),con = ElsByAttr(["data-content"]);
-        posResize(con);
-        currClass = curr;
-        for(var k in nav){
-            (function(key){
-                nav[key].node.click(function(){
-                    setNow(key);
-                    $('html,body').animate({scrollTop:con[key].offest.top}, 800);
-                })
-            })(k);
-        }
-        nav[now].node.addClass(currClass);
-        nowNav = now;
-    };
-    var setNow = function(key){
-        if(key != nowNav){
-            nav[key].node.addClass(currClass);
-            nav[nowNav].node.removeClass(currClass);
-            nowNav = key;
-            console.log(con[nowNav].offest.top);
-            
-        }
-    };
+    // resize window
+    var con;
     var posResize = function(list){
         for(var i in list){
             list[i].offest = list[i].node.offset();
@@ -62,25 +27,11 @@ var modules = {};
         }
         posResize(con);
     };
-    var windowScroll = function(e){
-        var t = $(window).scrollTop(),
-            l = t + clientHeight/2;
-        for(let k in con){
-            if( l >= con[k].offest.top && l <= con[k].offest.top+con[k].size.h){
-                clearTimeout(timer);
-                timer = setTimeout((function(key){
-                    return function(){
-                        clearTimeout(timer);
-                        setNow(key);
-                    }
-                })(k),100);
-                return;
-            }
-        }
-        console.log(e);
-    };
-    tabControler("index","curr");
     resize();
     window.addEventListener("resize",resize);
-    $(window).scroll(windowScroll);
+
+    // host
+    var hostNode = document.getElementById("host"),host = location.host;
+    hostNode.innerText = host;
+    hostNode.setAttribute("href",location.protocol +"//"+host);
 })()
