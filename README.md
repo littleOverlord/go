@@ -20,8 +20,8 @@ or <br />
 vim ~/.bash_profile<br />
 添加<br />
 export GOROOT=/usr/local/go<br />
-export GOPATH=/home/taoyx/program_develop/go_demo<br />
-export PATH=$PATH:$GOPATH:/usr/local/go/bin<br />
+export GOPATH=/home/go_demo<br />
+export PATH=$PATH:$GOROOT/bin<br />
 <br />
 source ~/.bash_profile 立即生效
 ## 工程结构

@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>我的生活日记</title>
+  <title>先去-记录点滴从现在开始</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta name="viewport" id="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
   <link rel="shortcut icon" href="" type="image/x-icon" />
@@ -10,88 +10,42 @@
 </head>
 
 <body>
-  <div class="welcome">
-    <div class="wc_text">欢迎来看我<br />└(^o^)┘</div>
-  </div>
   <div class="layout">
     <div class="top">
-      <div class="content">
-        <h1 class="logo">先去网</h1>
+      <div class="content header">
+        <h1 class="logo">先去</h1>
         <dl class="tag">
-            <dd data-tag="all" class="curr"><a href="javascript:;">all</a></dd>
-            <dd data-tag="nodejs"><a href="javascript:;">nodejs</a></dd>
-            <dd data-tag="javascript"><a href="javascript:;">javascript</a></dd>
-            <dd data-tag="typescript"><a href="javascript:;">typescript</a></dd>
-            <dd data-tag="golang"><a href="javascript:;">golang</a></dd>
+            <dd data-tag="All" class="curr"><a href="javascript:;">All</a></dd>
+            <dd data-tag="Nodejs"><a href="javascript:;">Nodejs</a></dd>
+            <dd data-tag="前端"><a href="javascript:;">前端</a></dd>
+            <dd data-tag="Golang"><a href="javascript:;">Golang</a></dd>
         </dl>
         <ul class="nav">
-          <li data-tag="about"><a href="javascript:;">关于我们</a></li>
-          <li data-tag="contact"><a href="javascript:;">联系我们</a></li>
+          <li data-eid="about"><a href="javascript:;">关于我们</a></li>
         </ul>
       </div>
     </div>
     <div class="content">
-        
-        <div class="essay_list">
-            <div class="essay_i" data-eid="">
-                <div class="ei_l">
-                    <p class="ei_info">官方·2019-05-01</p>
-                    <h2 class="ei_title">Vue3.0 前的 TypeScript 最佳入门实践</h2>
-                    <ul class="ei_tag">
-                        <li>Vue.js</li>
-                        <li>TypeScript</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="essay_i">
-                <div class="ei_l">
-                    <p class="ei_info">官方·2019-05-01</p>
-                    <h2 class="ei_title">Vue3.0 前的 TypeScript 最佳入门实践</h2>
-                    <ul class="ei_tag">
-                        <li>Vue.js</li>
-                        <li>TypeScript</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="essay_i">
-                <div class="ei_l">
-                    <p class="ei_info">官方·2019-05-01</p>
-                    <h2 class="ei_title">Vue3.0 前的 TypeScript 最佳入门实践</h2>
-                    <ul class="ei_tag">
-                        <li>Vue.js</li>
-                        <li>TypeScript</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="essay_i">
-                <div class="ei_l">
-                    <p class="ei_info">官方·2019-05-01</p>
-                    <h2 class="ei_title">Vue3.0 前的 TypeScript 最佳入门实践</h2>
-                    <ul class="ei_tag">
-                        <li>Vue.js</li>
-                        <li>TypeScript</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="essay_i">
-                <div class="ei_l">
-                    <p class="ei_info">官方·2019-05-01</p>
-                    <h2 class="ei_title">Vue3.0 前的 TypeScript 最佳入门实践</h2>
-                    <ul class="ei_tag">
-                        <li>Vue.js</li>
-                        <li>TypeScript</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        <div class="essay_list" id="essayList"></div>
     </div>
     <div class="footer">
       © 2017-2020 <a href="www.xianquyouxi.com" id="host">www.xianquyouxi.com</a> 版权所有蜀ICP备17043385号-1
     </div>
   </div>
+  <div class="essay_show" id="essayShow">
+    <div class="essay_bg" id="essayBg">
+        <div class="essay_close" id="essayClose">X</div>
+    </div>
+    <div class="essay_content" id="essayContent">
+      <div class="essay_detail" id="essayDetail"></div>
+      
+    </div>
+    
+  </div>
   <script src="js/jquery.3.3.1.js"></script>
-  <script src="js/common.js?15"></script>
-  <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=Vw5Vqxs4Kmvl8TzvuQ7BRldY5sGgkd2s"></script>
-  <script src="js/map.js?15"></script>
+  <script src="js/common.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/essay.js"></script>
+  <script src="js/essay_cfg.js"></script>
 </body>
 </html>

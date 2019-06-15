@@ -10,7 +10,7 @@ body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 20px;
   color:#333333;
-  background-color: #fff;
+  background-color: #f4f5f5;
 }
 li{
   list-style: none;
@@ -24,38 +24,11 @@ a:hover{
   text-decoration: underline;
 }
 
-.welcome,.layout{
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  left:0;
-  top:0;
-}
-.welcome{
-  display: none;
-  z-index: 10;
-  font-size: 2rem;
-  line-height: 100%;
-  background-color: #1d1d1d;
-}
-.wc_text{
-  position: absolute;
-  left: 50%;
-  top:50%;
-  margin-top:-2.5rem;
-  margin-left:-6rem;
-  width:12rem;
-  height:5rem;
-  text-align: center;
-  line-height:2.5rem;
-  color: #ffcc00;
-  
-}
 .layout{
   z-index: 5;
   overflow-x: hidden;
   overflow-y: auto;
-  background-color: #f4f5f5;
+  
 }
 
 .content{
@@ -63,7 +36,9 @@ a:hover{
   height: auto;
   max-width:1000px;
 }
-
+.header{
+  position: relative;
+}
 .top{
   position: fixed;
   top: 0;
@@ -87,7 +62,9 @@ a:hover{
   font-size: 2rem;
 }
 .nav{
-  float: right;
+  position: absolute;
+  right: .5rem;
+  top: 0;
 }
 .nav li{
   padding:0 .4rem;
@@ -164,17 +141,126 @@ a:hover{
   z-index: 10;
   width: 100%;
   height:2rem;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #f4f5f5;
   font-size:0.6rem;
   line-height: 2rem;
   text-align: center;
   background-color: #fff;
 }
 
-
-@media screen and (max-width:700px){
-
+/**
+文章详情
+*/
+.essay_show{
+  position: fixed;
+  display: none;
+  z-index: 20;
+  width: 100%;
+  height:100%;
+  left:0;
+  top:0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, .5)
 }
-@media screen and (min-width:700px){
+.essay_bg{
+  position: fixed;
+  z-index: 5;
+  left: 50%;
+  top:0;
+  height: 100%;
+  background-color: #fff;
+}
+.essay_content{
+  position: relative;
+  z-index: 9;
+  margin: 0 auto;
+  max-width: 1000px;
+}
+.essay_detail{
+  padding: 1.5rem;
+}
+.essay_detail .ei_title{
+  line-height:4rem;
+}
+.essay_words{
+  padding: 1rem 0;
+}
+.essay_words h3{
+  margin-top:1rem;
+  margin-bottom:1rem;
+  font-size:1.2rem;
+  line-height: 3rem;
+  border-bottom: 1px solid #f4f5f5;
+}
+.essay_words h4{
+  margin-top:1rem;
+  margin-bottom:1rem;
+  font-size:1rem;
+  line-height: 3rem;
+}
+.essay_words p{
+  margin-top:1rem;
+  font-size: 1rem;
+  line-height: 2rem;
+}
+.essay_words img{
+  max-width: 100%;
+  margin: 1rem auto;
+}
+.essay_words pre{
+  padding:1rem;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size:1rem;
+  line-height:1.5rem;
+  background-color: rgba(202, 202, 202, 0.2);
+  overflow: auto;
+}
+.essay_words ul{
+  padding: .5rem 1.5rem;
+}
+.essay_words ul li{
+  list-style-type: disc;
+  font-size:1rem;
+  line-height: 2rem;
+}
+.essay_words ol{
+  padding: .5rem 1.5rem;
+}
+.essay_words ol li{
+  list-style-type: decimal;
+  font-size:1rem;
+  line-height: 2rem;
+}
+
+.essay_close{
+  position: absolute;
+  right: -2.4rem;
+  top:0;
+  width: 2.4rem;
+  height: 2.4rem;
+  line-height: 2.4rem;
+  text-align: center;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+}
+
+@media screen and (max-width:630px){
+  .top{
+    height: 6rem;
+  }
+  .logo{
+    float: none;
+  }
+  .tag{
+    float: none;
+    width: 100%;
+  }
+  .essay_list{
+    padding-top:6.4rem;
+  }
+}
+@media screen and (min-width:630px){
 
 }

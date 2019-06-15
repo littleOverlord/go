@@ -1,0 +1,87 @@
+(function(){
+    var exports = modules["essay_cfg"] = {};
+    exports.list = [
+        {
+            eid:"about",
+            title:"关于我们",
+            tags:[],
+            author:"官方",
+            from:"",
+            type:"",
+            time:1546444800000
+        },
+        {
+            eid:"1",
+            title:"Vue3.0 前的 TypeScript 最佳入门实践",
+            tags:["Vue.js","TypeScript"],
+            author:"官方",
+            type:"essay",
+            from:"https://juejin.im/post/5d0259f2518825405d15ae62",
+            time:1546444800000
+        },
+        {
+            eid:"2",
+            title:"前端工作学习相关网站收集整理",
+            tags:["前端"],
+            author:"官方",
+            type:"essay",
+            from:"https://juejin.im/post/5d003f51e51d454fbe24a661",
+            time:1560297600000
+        },
+        {
+            eid:"3",
+            title:"我是这样让公司使用Node.js的",
+            tags:["Nodejs"],
+            author:"官方",
+            type:"essay",
+            from:"https://juejin.im/post/5d033550f265da1b9253d6e3",
+            time:1560470400000
+        },
+        {
+            eid:"4",
+            title:"开发中常用的 25 个JavaScript 单行代码",
+            tags:["Javascript"],
+            author:"官方",
+            type:"essay",
+            from:"https://juejin.im/post/5d01bd04f265da1b7a4b6e03",
+            time:1560384000000
+        },
+        {
+            eid:"5",
+            title:"如何在 JS 循环中正确使用 async 与 await",
+            tags:["Javascript"],
+            author:"前端小智",
+            type:"essay",
+            from:"https://juejin.im/post/5cf7042df265da1ba647d9d1",
+            time:1559692800000
+        },
+        {
+            eid:"6",
+            title:"golang 详解 defer",
+            tags:["Golang"],
+            author:"li_peng",
+            type:"essay",
+            from:"https://juejin.im/post/5d034fabf265da1b971a716f",
+            time:1560297600000
+        },
+        {
+            eid:"7",
+            title:"[译] Go: 理解 Sync.Pool 的设计",
+            tags:["Golang"],
+            author:"咔叽咔叽",
+            type:"essay",
+            from:"https://juejin.im/post/5d006254e51d45776031afe3",
+            time:1560384000000
+        },
+        {
+            eid:"8",
+            title:"用go-module作为包管理器搭建go的web服务器",
+            tags:["Golang"],
+            author:"detectiveHLH",
+            type:"essay",
+            from:"https://juejin.im/post/5cfe14b7f265da1ba431e28e",
+            time:1560124800000
+        }
+    ];
+    modules.essay.addList(exports.list);
+})()
