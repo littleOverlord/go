@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+	"sync"
 
 	"github.com/gorilla/websocket"
 
@@ -12,7 +13,34 @@ import (
 )
 
 // Clients is all logined client cache list
-type Clients map[int]Client
+var Clients = &struct {
+	caches map[int]*Client
+	mux sync.Mutex
+}{
+	caches : make(map[int]*Client),
+}
+// SendMany is send message to many clients
+func SendMany(uids []int, text string){
+	Clients.mux.Lock()
+	for _,v := range uids{
+		c,ok := Clients.caches[v]
+		if ok {
+			c.sendMessage(&ClientMessage{
+				Mid : 0,
+				Face: "",
+				Data: "",
+			},text)
+		}
+	}
+	Clients.mux.Unlock()
+}
+
+// AddClientToCache is add one client to cache
+func AddClientToCache(uid int, c *Client){
+	Clients.mux.Lock()
+	Clients.caches[uid] = c
+	Clients.mux.Unlock()
+}
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
@@ -107,7 +135,7 @@ func (c *Client) writePump() {
 		}
 	}
 }
-
+// send message to single client
 func (c *Client) sendMessage(o *ClientMessage, text string) {
 	message := []byte(fmt.Sprintf(`{"mid":%d,"data":%s}`, o.Mid, text))
 	c.send <- message
