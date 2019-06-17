@@ -93,4 +93,13 @@ _操作其实是引入该包，而不直接使用包里面的函数， 而是调
 
 ### websocket服务
 
+    目录：src/ni/websocket
+    基于github.com/gorilla/websocket包开发
+
 ### mongodb数据库
+
+
+## 项目依赖
+
+    websocket : github.com/gorilla/websocket
+    mongodb : 
