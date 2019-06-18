@@ -1,33 +1,35 @@
-// Copyright 2019 tdd authors
+//Package config cache all ".json" config
 package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
-	"fmt"
 	"path"
-	_"path/filepath"
 
-	_"ni/logger"
 	"ni/util"
 )
-// 配置缓存表
-var Table map[string]interface{} = make(map[string]interface{})
+
+//Table 配置缓存表
+var Table = make(map[string]interface{})
+
 // 源码目录
 var srcAbs string
-func init(){
-	defer func(){
+
+func init() {
+	defer func() {
 		if p := recover(); p != nil {
 			fmt.Println(p)
-        }
+		}
 	}()
 	srcAbs = srcPath()
 	loadConfig("app")
 }
+
 // 读取某个目录下的json
 func loadConfig(rd string) {
-	absDir := path.Join(srcAbs,rd)
+	absDir := path.Join(srcAbs, rd)
 
 	dir, err := os.Open(absDir)
 	if err != nil {
@@ -39,28 +41,30 @@ func loadConfig(rd string) {
 	if err != nil {
 		panic("loadConfig Readdir error : " + err.Error())
 	}
-	fmt.Println(len(files))
+	// fmt.Println(len(files))
 	for _, file := range files {
-		fmt.Println(file.Name())
-		if util.IsDir(path.Join(absDir,file.Name())) {
-			loadConfig(path.Join(rd,file.Name()))
-		} else if(path.Ext(file.Name()) == ".json"){
+		// fmt.Println(file.Name())
+		if util.IsDir(path.Join(absDir, file.Name())) {
+			loadConfig(path.Join(rd, file.Name()))
+		} else if path.Ext(file.Name()) == ".json" {
 			var conf interface{}
-			err = parseJSON(path.Join(absDir,file.Name()),&conf)
+			err = parseJSON(path.Join(absDir, file.Name()), &conf)
 			if err != nil {
 				panic("loadConfig parseJSON error : " + err.Error())
 			}
-			fmt.Println(path.Join(rd,file.Name()),conf)
-			Table[path.Join(rd,file.Name())] = conf
+			// fmt.Println(path.Join(rd,file.Name()),conf)
+			Table[path.Join(rd, file.Name())] = conf
 		}
 	}
 
 }
+
 // 获取src绝对路径
-func srcPath() string{
-	_path := path.Join(util.WorkSpace,"src")
+func srcPath() string {
+	_path := path.Join(util.WorkSpace, "src")
 	return _path
 }
+
 // 读取文件并解析
 func parseJSON(p string, c interface{}) error {
 	file, err := os.Open(p)
@@ -73,8 +77,8 @@ func parseJSON(p string, c interface{}) error {
 		return err
 	}
 
-	err = json.Unmarshal(content,c)
-	if(err != nil){
+	err = json.Unmarshal(content, c)
+	if err != nil {
 		return err
 	}
 	return nil

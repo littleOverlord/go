@@ -8,6 +8,7 @@ import (
 	"path"
 	"time"
 
+	"ni/config"
 	"ni/logger"
 	"ni/router"
 	"ni/util"
@@ -18,23 +19,24 @@ type httpHandleFunc func(w http.ResponseWriter, req *http.Request)
 
 //Create 创建http(s)服务
 // 从配置表中获取端口、以及https所需tls文件
-func Create(cfg map[string]interface{}) {
+func init() {
+	cfg := config.Table["app/main/config.json"].(map[string]interface{})["server"].(map[string]interface{})
 
-	fmt.Println("http")
 	go func(c map[string]interface{}) {
 		err := httpServer("http", c, handleFunc)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
+		fmt.Println("http")
 	}(cfg)
 
-	fmt.Println("https")
 	go func(c map[string]interface{}) {
 		time.Sleep(1000 * time.Microsecond)
 		err := httpsServer("https", c, handleFunc)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
+		fmt.Println("https")
 	}(cfg)
 }
 
@@ -63,7 +65,7 @@ func httpServer(scheme string, cfg map[string]interface{}, hf httpHandleFunc) er
 	if port == "0" {
 		return nil
 	}
-	fmt.Println(":" + port)
+	// fmt.Println(":" + port)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hf)
 	err := http.ListenAndServe(":"+port, mux)
