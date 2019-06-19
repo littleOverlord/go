@@ -4,8 +4,9 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
-	"time"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 
@@ -15,28 +16,29 @@ import (
 // Clients is all logined client cache list
 var Clients = &struct {
 	caches map[int]*Client
-	mux sync.Mutex
+	mux    sync.Mutex
 }{
-	caches : make(map[int]*Client),
+	caches: make(map[int]*Client),
 }
+
 // SendMany is send message to many clients
-func SendMany(uids []int, text string){
+func SendMany(uids []int, text string) {
 	Clients.mux.Lock()
-	for _,v := range uids{
-		c,ok := Clients.caches[v]
+	for _, v := range uids {
+		c, ok := Clients.caches[v]
 		if ok {
-			c.sendMessage(&ClientMessage{
-				Mid : 0,
+			c.SendMessage(&ClientMessage{
+				Mid:  0,
 				Face: "",
 				Data: "",
-			},text)
+			}, text)
 		}
 	}
 	Clients.mux.Unlock()
 }
 
 // AddClientToCache is add one client to cache
-func AddClientToCache(uid int, c *Client){
+func AddClientToCache(uid int, c *Client) {
 	Clients.mux.Lock()
 	Clients.caches[uid] = c
 	Clients.mux.Unlock()
@@ -58,11 +60,16 @@ type Client struct {
 // ClientMessage is from client
 // mid is the message id of single client
 // face is the interface of server, like "app/player@login"
-// data is the message body
 type ClientMessage struct {
-	Mid  int
-	Face string
-	Data string
+	Mid  int    `json:"mid"`
+	Face string `json:"face"`
+	Data string `json:"data"`
+}
+
+// ResponseMessage is a message from server for response client
+type ResponseMessage struct {
+	Mid  int `json:"mid"`
+	Data interface{}
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -89,6 +96,9 @@ func (c *Client) readPump() {
 		fmt.Println(message)
 		var data *ClientMessage
 		err = json.Unmarshal(message, data)
+
+		data.Data = strings.ReplaceAll(data.Data, "_(", "{")
+		data.Data = strings.ReplaceAll(data.Data, ")_", "}")
 		if err != nil {
 			logger.Error(fmt.Sprintf(`ws JSON Unmarshal failed: %s`, err.Error()))
 		} else {
@@ -135,8 +145,9 @@ func (c *Client) writePump() {
 		}
 	}
 }
-// send message to single client
-func (c *Client) sendMessage(o *ClientMessage, text string) {
+
+//SendMessage send message to single client
+func (c *Client) SendMessage(o *ClientMessage, text string) {
 	message := []byte(fmt.Sprintf(`{"mid":%d,"data":%s}`, o.Mid, text))
 	c.send <- message
 }

@@ -17,6 +17,8 @@ func main() {
 		fmt.Println(err.Error())
 	}
 	fmt.Println(data)
+	fmt.Println(data.face)
+	// getData(user{Mid: 1, Data: {Uid: 2}})
 }
 
 func changeVV(v *string, i *float64) {
@@ -25,7 +27,22 @@ func changeVV(v *string, i *float64) {
 }
 
 type ClientMessage struct {
-	Mid  int    `json:"mid"`
-	Face string `json:"face"`
-	Data []byte `json:"data"`
+	mid  int
+	face string
+	data []byte
+}
+
+type ResponseMessage struct {
+	Mid int `json:"mid"`
+}
+
+type user struct {
+	ResponseMessage
+	Data struct {
+		Uid int `json:"uid"`
+	} `json:"data"`
+}
+
+func getData(mess *ResponseMessage) {
+	fmt.Println(json.Marshal(mess))
 }
