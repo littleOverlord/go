@@ -9,5 +9,5 @@
 <p></p>
 <h3>联系方式</h3>
 <ul>
-    <li>邮箱：xianquyouxi.126.com</li>
+    <li>邮箱：xianquyouxi@126.com</li>
 </ul>
