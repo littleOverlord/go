@@ -36,7 +36,7 @@ func callHandler(message *ClientMessage, client *Client) {
 	}()
 	handler := handlers[message.Face]
 	if handler == nil {
-		client.sendMessage(message, fmt.Sprintf(`{"err":"Don't match '%s'"}`, message.Face))
+		client.SendMessage(message, fmt.Sprintf(`{"err":"Don't match '%s'"}`, message.Face))
 		return
 	}
 	go handler(message, client)

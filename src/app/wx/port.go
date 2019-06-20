@@ -33,7 +33,7 @@ func login(message *websocket.ClientMessage, client *websocket.Client) {
 	var data *loginMessage
 	err := json.Unmarshal([]byte(message.Data), &data)
 	defer func(){
-		client.sendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+		client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
 	}
 	if err != nil {
 		return

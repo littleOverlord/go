@@ -3,11 +3,20 @@ package client
 import (
 	"fmt"
 	"ni/mongodb"
+	"sync"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var uid int
+var uid = &struct {
+	key   string
+	value int
+}{
+	key:   "uid",
+	value: 0,
+}
+var mux sync.Mutex
 
 func init() {
 	initUid()
@@ -17,20 +26,20 @@ func init() {
 
 func initUid() {
 	col, ctx, cancel := mongodb.Collection("client")
-	filter := bson.M{}
-	defer cal()
+	defer cancel()
 	// filter posts tagged as golang
-	filter := bson.M{key:"uid"}
-	{$set:{key:"uid"}, $inc : { "value" : 1 }}
-	cursor := col.FindOneAndUpdate(ctx, filter)
+	filter := bson.M{"key": "uid"}
+	opts := options.FindOneAndUpdate()
+	opts.SetUpsert(true)
+	opts.SetReturnDocument(options.After)
+
+	cursor := col.FindOneAndUpdate(ctx, filter, bson.M{"$set": bson.M{"key": "uid"}, "$inc": bson.M{"value": 1}}, opts)
 
 	// iterate through all documents
 	// for cursor.Next(ctx) {
-	var p Post
 	// decode the document
-	if err := cursor.Decode(&p); err != nil {
+	if err := cursor.Decode(uid); err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Printf("post: %+v\n", p)
-
+	fmt.Println(uid)
 }
