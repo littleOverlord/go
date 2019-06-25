@@ -6,6 +6,8 @@ import (
 	"ni/mongodb"
 	"sync"
 
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -40,20 +42,26 @@ func initUID() {
 	// filter posts tagged as golang
 	filter := bson.M{"key": "uid"}
 
-	cursor := col.FindOne(ctx, filter)
-
+	// cursor := col.FindOne(ctx, filter)
 	// iterate through all documents
 	// for cursor.Next(ctx) {
 	// decode the document
+	// if err := cursor.Decode(uid); err != nil {
+	// 	panic(err.Error())
+	// }
+	// fmt.Println(uid)
+	// if uid.value == 0 {
+	// 	_, err := col.InsertOne(ctx, bson.M{"key": "uid", "value": 10000})
+	// 	if err != nil {
+	// 		panic(err.Error())
+	// 	}
+	// }
+	opts := options.FindOneAndUpdate()
+	opts.SetReturnDocument(options.After)
+	opts.SetUpsert(true)
+	cursor := col.FindOneAndUpdate(ctx, filter, bson.M{"$set": bson.M{"key": "uid", "value": 10000}}, opts)
 	if err := cursor.Decode(uid); err != nil {
 		panic(err.Error())
-	}
-	fmt.Println(uid)
-	if uid.value == 0 {
-		_, err := col.InsertOne(ctx, bson.M{"key": "uid", "value": 10000})
-		if err != nil {
-			panic(err.Error())
-		}
 	}
 }
 
