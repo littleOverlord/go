@@ -7,7 +7,11 @@ import (
 	"net/http"
 
 	"ni/logger"
+	"ni/mongodb"
 	"ni/websocket"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type sessionResult struct {
@@ -25,23 +29,33 @@ type loginMessage struct {
 	iv        string
 }
 
+type userDB struct {
+	UID      int    `bson:"uid",json:"uid"`
+	Username string `bson:"username",json:"username"`
+	From     string `bson:"from",json:"from"`
+	Name     string `bson:"name",json:"name"`
+	Head     string `bson:"head",json:"head"`
+}
+
 func port() {
 	websocket.RegistHandler("app/wx@login", login)
 }
 
-func login(message *websocket.ClientMessage, client *websocket.Client) {
+func login(message *websocket.ClientMessage, client *websocket.Client) error {
 	var data *loginMessage
 	err := json.Unmarshal([]byte(message.Data), &data)
-	defer func(){
+	defer func() {
 		client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
-	}
+	}()
 	if err != nil {
-		return
+		return err
 	}
 	userInfo, err := code2Session(data.code, data.gamename)
 	if err != nil {
-		return
+		return err
 	}
+
+	return nil
 }
 
 func code2Session(code string, gameName string) (data *sessionResult, err error) {
@@ -63,4 +77,24 @@ func code2Session(code string, gameName string) (data *sessionResult, err error)
 	}
 	fmt.Println(body)
 	return data, nil
+}
+
+func findUserByName(info *sessionResult, client *websocket.Client) error {
+	col, ctx, cancel := mongodb.Collection("user")
+	defer cancel()
+	filter := bson.M{"username": info.openid}
+	var res userDB
+	cursor := col.FindOne(ctx, filter)
+	if err := cursor.Decode(&res); err != nil {
+		if err == mongo.ErrNoDocuments {
+			uid := temp.
+			_, err := col.InsertOne(ctx, bson.M{"uid": client.SendMessage, "value": 10000})
+			if err != nil {
+				return err
+			}
+			websocket.AddClientToCache()
+		} else {
+			return err
+		}
+	}
 }
