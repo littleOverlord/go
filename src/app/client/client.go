@@ -6,32 +6,35 @@ import (
 	"ni/mongodb"
 	"sync"
 
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var mux sync.Mutex
+var (
+	mux     sync.Mutex
+	lastUID UID
+	wCh     = make(chan int, 100)
+)
 
-type Uid struct {
-	_id   string
-	key   string
-	value int
+// UID is a single db
+type UID struct {
+	ID    primitive.ObjectID `bson:"_id"`
+	Key   string             `bson:"key"`
+	Value int                `bson:"value"`
 }
 
 func init() {
 	initUID()
 	// regist ws(s) handlers
 	port()
+	go watchWrite()
 }
 
 func initUID() {
+	mux.Lock()
 	col, ctx, cancel := mongodb.Collection("client")
-	uid := &Uid{
-		key:   "uid",
-		value: 0,
-	}
 	defer func() {
 		cancel()
 		if p := recover(); p != nil {
@@ -42,55 +45,51 @@ func initUID() {
 	// filter posts tagged as golang
 	filter := bson.M{"key": "uid"}
 
-	// cursor := col.FindOne(ctx, filter)
-	// iterate through all documents
-	// for cursor.Next(ctx) {
-	// decode the document
-	// if err := cursor.Decode(uid); err != nil {
-	// 	panic(err.Error())
-	// }
-	// fmt.Println(uid)
-	// if uid.value == 0 {
-	// 	_, err := col.InsertOne(ctx, bson.M{"key": "uid", "value": 10000})
-	// 	if err != nil {
-	// 		panic(err.Error())
-	// 	}
-	// }
-	opts := options.FindOneAndUpdate()
-	opts.SetReturnDocument(options.After)
-	opts.SetUpsert(true)
-	cursor := col.FindOneAndUpdate(ctx, filter, bson.M{"$set": bson.M{"key": "uid", "value": 10000}}, opts)
-	if err := cursor.Decode(uid); err != nil {
-		panic(err.Error())
+	cursor := col.FindOne(ctx, filter)
+	if err := cursor.Decode(&lastUID); err != nil {
+		if err == mongo.ErrNoDocuments {
+			_, err := col.InsertOne(ctx, bson.M{"key": "uid", "value": 10000})
+			if err != nil {
+				panic(err.Error())
+			}
+		} else {
+			panic(err.Error())
+		}
 	}
+	mux.Unlock()
 }
 
 //GetUID is the way to get new user id
 func GetUID() (int, error) {
-	var (
-		uid *Uid
-		err error
-	)
+	var v int
+	mux.Lock()
+	v = lastUID.Value
+	lastUID.Value++
+	wCh <- lastUID.Value
+	mux.Unlock()
+	return v, nil
+}
+
+func writeUID(v int) error {
+	fmt.Printf(`writeUID :: %d`, v)
 	col, ctx, cancel := mongodb.Collection("client")
 	defer cancel()
-	cursor := col.FindOne(ctx, bson.M{"key": "uid"})
-	if err = cursor.Decode(uid); err != nil {
-		return 0, err
-	}
-
-	id, err := primitive.ObjectIDFromHex(uid._id)
-	if err != nil {
-		return 0, err
-	}
-
-	// set filters and updates
-	filter := bson.M{"_id": id}
-	update := bson.M{"$set": bson.M{"value": uid.value + 1}}
+	filter := bson.M{"_id": lastUID.ID}
+	update := bson.M{"$set": bson.M{"value": v}}
 
 	// update document
-	_, err = col.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return 0, err
+	_, err := col.UpdateOne(ctx, filter, update)
+	return err
+}
+
+func watchWrite() {
+	for v := range wCh {
+		n := len(wCh)
+		if n == 0 {
+			err := writeUID(v)
+			if err != nil {
+				logger.Error(err.Error())
+			}
+		}
 	}
-	return uid.value, nil
 }
