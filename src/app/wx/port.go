@@ -10,6 +10,8 @@ import (
 	"ni/mongodb"
 	"ni/websocket"
 
+	"app/temp"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -50,11 +52,19 @@ func login(message *websocket.ClientMessage, client *websocket.Client) error {
 	if err != nil {
 		return err
 	}
-	userInfo, err := code2Session(data.code, data.gamename)
+	sr, err := code2Session(data.code, data.gamename)
 	if err != nil {
 		return err
 	}
+	wxdc := &WxBizDataCrypt{
+		AppID:      wxCfg[data.gamename].appID,
+		SessionKey: sr.sessionKey,
+	}
 
+	wxinfo, err := wxdc.Decrypt(data.encrypted, data.iv, false)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -79,16 +89,19 @@ func code2Session(code string, gameName string) (data *sessionResult, err error)
 	return data, nil
 }
 
-func findUserByName(info *sessionResult, client *websocket.Client) error {
+func findUserByName(info interface{}, client *websocket.Client) error {
 	col, ctx, cancel := mongodb.Collection("user")
 	defer cancel()
-	filter := bson.M{"username": info.openid}
+	filter := bson.M{"username": info.(map[string]string)["openid"]}
 	var res userDB
 	cursor := col.FindOne(ctx, filter)
 	if err := cursor.Decode(&res); err != nil {
 		if err == mongo.ErrNoDocuments {
-			uid := temp.
-			_, err := col.InsertOne(ctx, bson.M{"uid": client.SendMessage, "value": 10000})
+			uid, err := temp.GetUID()
+			if err != nil {
+				return err
+			}
+			_, err = col.InsertOne(ctx, bson.M{"uid": uid, "value": 10000})
 			if err != nil {
 				return err
 			}
