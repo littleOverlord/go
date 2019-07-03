@@ -17,6 +17,7 @@ var Table = make(map[string]interface{})
 // 源码目录
 var srcAbs string
 
+// Load is start load all ".json" config files in app dir
 func init() {
 	defer func() {
 		if p := recover(); p != nil {
@@ -52,7 +53,7 @@ func loadConfig(rd string) {
 			if err != nil {
 				panic("loadConfig parseJSON error : " + err.Error())
 			}
-			// fmt.Println(path.Join(rd,file.Name()),conf)
+			// fmt.Println(path.Join(rd, file.Name()), Table[path.Join(rd, file.Name())])
 			Table[path.Join(rd, file.Name())] = conf
 		}
 	}

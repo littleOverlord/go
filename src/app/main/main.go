@@ -4,6 +4,8 @@ import (
 	_ "ni/server"
 	_ "ni/websocket"
 
+	_ "app/cfg"
+	_ "app/user"
 	_ "app/wx"
 )
 

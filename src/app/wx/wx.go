@@ -31,7 +31,7 @@ func init() {
 func initCfg() {
 	cfg := config.Table["app/main/config.json"].(map[string]interface{})["wx"].(map[string]interface{})
 	for k, v := range cfg {
-		wxCfg[k] = &wxProject{appID: v.(map[string]string)["appID"], appSecret: v.(map[string]string)["appSecret"]}
+		wxCfg[k] = &wxProject{appID: v.(map[string]interface{})["appID"].(string), appSecret: v.(map[string]interface{})["appSecret"].(string)}
 	}
 }
 
