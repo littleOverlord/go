@@ -3,17 +3,8 @@ package wx
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 
-	"ni/logger"
-	"ni/mongodb"
 	"ni/websocket"
-
-	"app/temp"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type sessionResult struct {
@@ -32,11 +23,12 @@ type loginMessage struct {
 }
 
 type userDB struct {
-	UID      int    `bson:"uid",json:"uid"`
-	Username string `bson:"username",json:"username"`
-	From     string `bson:"from",json:"from"`
-	Name     string `bson:"name",json:"name"`
-	Head     string `bson:"head",json:"head"`
+	UID      int    `bson:"uid" json:"uid"`
+	Username string `bson:"username" json:"username"`
+	From     string `bson:"from" json:"from"`
+	Name     string `bson:"name" json:"name"`
+	Head     string `bson:"head" json:"head"`
+	Password string `bson:"password" json:"password"`
 }
 
 func port() {
@@ -65,49 +57,10 @@ func login(message *websocket.ClientMessage, client *websocket.Client) error {
 	if err != nil {
 		return err
 	}
+	uinfo, err := findUserByName(data.gamename, wxinfo, client)
+	if err != nil {
+		return err
+	}
+	client.SendMessage(message, fmt.Sprintf(`{"ok": %s}`, uinfo))
 	return nil
-}
-
-func code2Session(code string, gameName string) (data *sessionResult, err error) {
-	resp, err := http.Get(fmt.Sprintf(`https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code`, wxCfg[gameName].appID, wxCfg[gameName].appSecret, code))
-	if err != nil {
-		// handle error
-		return nil, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
-	err = json.Unmarshal(body, &data)
-	if err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
-	fmt.Println(body)
-	return data, nil
-}
-
-func findUserByName(info interface{}, client *websocket.Client) error {
-	col, ctx, cancel := mongodb.Collection("user")
-	defer cancel()
-	filter := bson.M{"username": info.(map[string]string)["openid"]}
-	var res userDB
-	cursor := col.FindOne(ctx, filter)
-	if err := cursor.Decode(&res); err != nil {
-		if err == mongo.ErrNoDocuments {
-			uid, err := temp.GetUID()
-			if err != nil {
-				return err
-			}
-			_, err = col.InsertOne(ctx, bson.M{"uid": uid, "value": 10000})
-			if err != nil {
-				return err
-			}
-			websocket.AddClientToCache()
-		} else {
-			return err
-		}
-	}
 }
