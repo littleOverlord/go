@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
+	"ni/config"
 	"ni/logger"
 	"ni/server"
 )
@@ -33,6 +34,11 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
+}
+
+func init() {
+	cfg := config.Table["app/main/config.json"].(map[string]interface{})["server"].(map[string]interface{})
+	Create(cfg)
 }
 
 // serveWs handles websocket requests from the peer.

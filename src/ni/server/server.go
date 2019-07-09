@@ -42,11 +42,14 @@ func init() {
 
 //CreateSingle create single server for http or https
 func CreateSingle(scheme string, cfg map[string]interface{}, fh httpHandleFunc) (err error) {
+	fmt.Println(scheme)
 	switch scheme {
 	case "ws":
 		err = httpServer(scheme, cfg, fh)
+		break
 	case "wss":
 		err = httpsServer(scheme, cfg, fh)
+		break
 	}
 	return err
 }
@@ -65,7 +68,7 @@ func httpServer(scheme string, cfg map[string]interface{}, hf httpHandleFunc) er
 	if port == "0" {
 		return nil
 	}
-	// fmt.Println(":" + port)
+	fmt.Println(":" + port)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hf)
 	err := http.ListenAndServe(":"+port, mux)
