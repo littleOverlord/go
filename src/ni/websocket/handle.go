@@ -20,7 +20,7 @@ func RegistHandler(face string, handler WsHandler) {
 		}
 	}()
 	f := handlers[face]
-	if f == nil {
+	if f != nil {
 		panic(fmt.Sprintf("Have the same handler of '%s'", face))
 	}
 	handlers[face] = handler
@@ -34,9 +34,9 @@ func callHandler(message *ClientMessage, client *Client) {
 			logger.Error(err.Error())
 		}
 	}()
-	handler := handlers[message.Face]
+	handler := handlers[message.Type]
 	if handler == nil {
-		client.SendMessage(message, fmt.Sprintf(`{"err":"Don't match '%s'"}`, message.Face))
+		client.SendMessage(message, fmt.Sprintf(`{"err":"Don't match '%s'"}`, message.Type))
 		return
 	}
 	go handler(message, client)

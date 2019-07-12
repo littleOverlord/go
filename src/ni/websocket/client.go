@@ -4,7 +4,6 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -29,8 +28,7 @@ func SendMany(uids []int, text string) {
 		if ok {
 			c.SendMessage(&ClientMessage{
 				Mid:  0,
-				Face: "",
-				Data: "",
+				Type: "",
 			}, text)
 		}
 	}
@@ -61,9 +59,9 @@ type Client struct {
 // mid is the message id of single client
 // face is the interface of server, like "app/player@login"
 type ClientMessage struct {
-	Mid  int    `json:"mid"`
-	Face string `json:"face"`
-	Data string `json:"data"`
+	Mid  int         `json:"mid"`
+	Type string      `json:"type"`
+	Arg  interface{} `json:"arg"`
 }
 
 // ResponseMessage is a message from server for response client
@@ -94,15 +92,15 @@ func (c *Client) readPump() {
 			break
 		}
 		fmt.Println(message)
-		var data *ClientMessage
-		err = json.Unmarshal(message, data)
-
-		data.Data = strings.ReplaceAll(data.Data, "_(", "{")
-		data.Data = strings.ReplaceAll(data.Data, ")_", "}")
+		var data ClientMessage
+		err = json.Unmarshal(message, &data)
+		fmt.Println(data)
+		// data.Data = strings.ReplaceAll(data.Data, "_(", "{")
+		// data.Data = strings.ReplaceAll(data.Data, ")_", "}")
 		if err != nil {
 			logger.Error(fmt.Sprintf(`ws JSON Unmarshal failed: %s`, err.Error()))
 		} else {
-			callHandler(data, c)
+			go callHandler(&data, c)
 		}
 	}
 }

@@ -26,10 +26,10 @@ func init() {
 // 用户注册
 func registUser(info interface{}, client *websocket.Client) (string, error) {
 
-	username := info.(map[string]string)["name"]
-	gamename := info.(map[string]string)["gamename"]
-	password := info.(map[string]string)["psw"]
-	from := info.(map[string]string)["from"]
+	username := info.(map[string]interface{})["name"].(string)
+	gamename := info.(map[string]interface{})["gamename"].(string)
+	password := info.(map[string]interface{})["psw"].(string)
+	from := info.(map[string]interface{})["from"].(string)
 	col, ctx, cancel := mongodb.Collection(gamename + "_user")
 	defer cancel()
 	filter := bson.M{"username": username}
@@ -49,7 +49,7 @@ func registUser(info interface{}, client *websocket.Client) (string, error) {
 				return "", err
 			}
 			go websocket.AddClientToCache(uid, client)
-			msg = fmt.Sprintf(`{"ok":{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s"}`, uid, username, "", from, "")
+			msg = fmt.Sprintf(`{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s"}`, uid, username, "", from, "")
 			return msg, nil
 		}
 		return "", err
@@ -60,9 +60,9 @@ func registUser(info interface{}, client *websocket.Client) (string, error) {
 // 用户登录
 func loginUser(info interface{}, client *websocket.Client) (string, error) {
 
-	username := info.(map[string]string)["name"]
-	gamename := info.(map[string]string)["gamename"]
-	password := info.(map[string]string)["psw"]
+	username := info.(map[string]interface{})["name"].(string)
+	gamename := info.(map[string]interface{})["gamename"].(string)
+	password := info.(map[string]interface{})["psw"].(string)
 	col, ctx, cancel := mongodb.Collection(gamename + "_user")
 	defer cancel()
 	filter := bson.M{"username": username}
@@ -77,6 +77,6 @@ func loginUser(info interface{}, client *websocket.Client) (string, error) {
 		return "", errors.New("login error")
 	}
 	websocket.AddClientToCache(res.UID, client)
-	msg = fmt.Sprintf(`{"ok":{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s"}`, res.UID, res.Username, res.Name, res.From, res.Head)
+	msg = fmt.Sprintf(`{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s"}`, res.UID, res.Username, res.Name, res.From, res.Head)
 	return msg, nil
 }

@@ -1,7 +1,6 @@
 package user
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"ni/websocket"
@@ -27,15 +26,12 @@ func port() {
 }
 
 func regist(message *websocket.ClientMessage, client *websocket.Client) error {
-	var data *loginMessage
-	err := json.Unmarshal([]byte(message.Data), &data)
+	// var data *loginMessage
+	var err error
 	defer func() {
 		client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
 	}()
-	if err != nil {
-		return err
-	}
-	uinfo, err := registUser(data, client)
+	uinfo, err := registUser(message.Arg, client)
 	if err != nil {
 		return err
 	}
@@ -44,15 +40,14 @@ func regist(message *websocket.ClientMessage, client *websocket.Client) error {
 }
 
 func login(message *websocket.ClientMessage, client *websocket.Client) error {
-	var data *loginMessage
-	err := json.Unmarshal([]byte(message.Data), &data)
+	var err error
 	defer func() {
 		client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
 	}()
 	if err != nil {
 		return err
 	}
-	uinfo, err := loginUser(data, client)
+	uinfo, err := loginUser(message.Arg, client)
 	if err != nil {
 		return err
 	}

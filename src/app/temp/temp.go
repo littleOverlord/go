@@ -72,6 +72,7 @@ func GetUID() (int, error) {
 
 func writeUID(v int) error {
 	fmt.Printf(`writeUID :: %d`, v)
+	fmt.Println(lastUID.ID)
 	col, ctx, cancel := mongodb.Collection("client")
 	defer cancel()
 	filter := bson.M{"_id": lastUID.ID}

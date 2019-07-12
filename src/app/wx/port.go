@@ -1,7 +1,6 @@
 package wx
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"ni/websocket"
@@ -36,28 +35,31 @@ func port() {
 }
 
 func login(message *websocket.ClientMessage, client *websocket.Client) error {
-	var data *loginMessage
-	err := json.Unmarshal([]byte(message.Data), &data)
+	var err error
+	code := message.Arg.(map[string]interface{})["code"].(string)
+	gamename := message.Arg.(map[string]interface{})["gamename"].(string)
+	encrypted := message.Arg.(map[string]interface{})["encrypted"].(string)
+	iv := message.Arg.(map[string]interface{})["iv"].(string)
 	defer func() {
 		client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
 	}()
 	if err != nil {
 		return err
 	}
-	sr, err := code2Session(data.code, data.gamename)
+	sr, err := code2Session(code, gamename)
 	if err != nil {
 		return err
 	}
 	wxdc := &WxBizDataCrypt{
-		AppID:      wxCfg[data.gamename].appID,
+		AppID:      wxCfg[gamename].appID,
 		SessionKey: sr.sessionKey,
 	}
 
-	wxinfo, err := wxdc.Decrypt(data.encrypted, data.iv, false)
+	wxinfo, err := wxdc.Decrypt(encrypted, iv, false)
 	if err != nil {
 		return err
 	}
-	uinfo, err := findUserByName(data.gamename, wxinfo, client)
+	uinfo, err := findUserByName(gamename, wxinfo, client)
 	if err != nil {
 		return err
 	}
