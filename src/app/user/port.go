@@ -1,15 +1,17 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"ni/websocket"
 )
 
 type loginMessage struct {
-	userName string
-	gamename string
-	password string
+	Username string `json:"name,omitempty"`
+	Gamename string `json:"gamename,omitempty"`
+	Password string `json:"psw,omitempty"`
+	From     string `json:"from,omitempty"`
 }
 type userDB struct {
 	UID      int    `bson:"uid" json:"uid"`
@@ -26,12 +28,24 @@ func port() {
 }
 
 func regist(message *websocket.ClientMessage, client *websocket.Client) error {
-	// var data *loginMessage
+	var arg = loginMessage{
+		Username: "",
+		Gamename: "",
+		Password: "",
+		From:     "",
+	}
 	var err error
+
 	defer func() {
-		client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+		if err != nil {
+			client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+		}
 	}()
-	uinfo, err := registUser(message.Arg, client)
+	err = json.Unmarshal(message.ArgB, &arg)
+	if err != nil {
+		return err
+	}
+	uinfo, err := registUser(arg, client)
 	if err != nil {
 		return err
 	}
@@ -40,14 +54,23 @@ func regist(message *websocket.ClientMessage, client *websocket.Client) error {
 }
 
 func login(message *websocket.ClientMessage, client *websocket.Client) error {
+	var arg = loginMessage{
+		Username: "",
+		Gamename: "",
+		Password: "",
+		From:     "",
+	}
 	var err error
 	defer func() {
-		client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+		if err != nil {
+			client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+		}
 	}()
+	err = json.Unmarshal(message.ArgB, &arg)
 	if err != nil {
 		return err
 	}
-	uinfo, err := loginUser(message.Arg, client)
+	uinfo, err := loginUser(arg, client)
 	if err != nil {
 		return err
 	}

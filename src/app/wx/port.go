@@ -1,6 +1,8 @@
 package wx
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 
 	"ni/websocket"
@@ -15,10 +17,10 @@ type sessionResult struct {
 }
 
 type loginMessage struct {
-	code      string
-	encrypted string
-	gamename  string
-	iv        string
+	Code      string `json:"code,omitempty"`
+	Encrypted string `json:"encrypted,omitempty"`
+	Gamename  string `json:"gamename,omitempty"`
+	Iv        string `json:"iv,omitempty"`
 }
 
 type userDB struct {
@@ -35,14 +37,27 @@ func port() {
 }
 
 func login(message *websocket.ClientMessage, client *websocket.Client) error {
+	var arg = loginMessage{
+		Code:      "",
+		Encrypted: "",
+		Gamename:  "",
+		Iv:        "",
+	}
 	var err error
-	code := message.Arg.(map[string]interface{})["code"].(string)
-	gamename := message.Arg.(map[string]interface{})["gamename"].(string)
-	encrypted := message.Arg.(map[string]interface{})["encrypted"].(string)
-	iv := message.Arg.(map[string]interface{})["iv"].(string)
 	defer func() {
 		client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
 	}()
+	err = json.Unmarshal(message.ArgB, &arg)
+	if err != nil {
+		return err
+	}
+	code := arg.Code
+	gamename := arg.Gamename
+	encrypted := arg.Encrypted
+	iv := arg.Iv
+	if code == "" || gamename == "" || encrypted == "" || iv == "" {
+		return errors.New("arg error")
+	}
 	if err != nil {
 		return err
 	}

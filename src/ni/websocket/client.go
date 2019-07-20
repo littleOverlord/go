@@ -2,6 +2,7 @@
 package websocket
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"sync"
@@ -38,6 +39,7 @@ func SendMany(uids []int, text string) {
 // AddClientToCache is add one client to cache
 func AddClientToCache(uid int, c *Client) {
 	Clients.mux.Lock()
+	c.uid = uid
 	Clients.caches[uid] = c
 	Clients.mux.Unlock()
 }
@@ -59,9 +61,10 @@ type Client struct {
 // mid is the message id of single client
 // face is the interface of server, like "app/player@login"
 type ClientMessage struct {
-	Mid  int         `json:"mid"`
-	Type string      `json:"type"`
-	Arg  interface{} `json:"arg"`
+	Mid  int    `json:"mid"`
+	Type string `json:"type"`
+	Arg  string `json:"arg"`
+	ArgB []byte
 }
 
 // ResponseMessage is a message from server for response client
@@ -91,16 +94,22 @@ func (c *Client) readPump() {
 			}
 			break
 		}
-		fmt.Println(message)
-		var data ClientMessage
+		// fmt.Println(message)
+		var (
+			data ClientMessage
+			r    []byte
+		)
 		err = json.Unmarshal(message, &data)
-		fmt.Println(data)
-		// data.Data = strings.ReplaceAll(data.Data, "_(", "{")
-		// data.Data = strings.ReplaceAll(data.Data, ")_", "}")
-		if err != nil {
-			logger.Error(fmt.Sprintf(`ws JSON Unmarshal failed: %s`, err.Error()))
-		} else {
+		// fmt.Println(data)
+		if err == nil {
+			r, err = base64.StdEncoding.DecodeString(data.Arg)
+		}
+		if err == nil {
+			data.ArgB = r
+			// fmt.Println(string(r))
 			go callHandler(&data, c)
+		} else {
+			logger.Error(fmt.Sprintf(`ws JSON Unmarshal failed: %s`, err.Error()))
 		}
 	}
 }

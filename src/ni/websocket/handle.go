@@ -28,10 +28,10 @@ func RegistHandler(face string, handler WsHandler) {
 
 // deal the request of client
 func callHandler(message *ClientMessage, client *Client) {
-	var err error
 	defer func() {
-		if err != nil {
-			logger.Error(err.Error())
+		if p := recover(); p != nil {
+			// fmt.Println(p)
+			logger.Error(p.(string))
 		}
 	}()
 	handler := handlers[message.Type]
@@ -39,5 +39,5 @@ func callHandler(message *ClientMessage, client *Client) {
 		client.SendMessage(message, fmt.Sprintf(`{"err":"Don't match '%s'"}`, message.Type))
 		return
 	}
-	go handler(message, client)
+	handler(message, client)
 }

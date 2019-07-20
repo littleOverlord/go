@@ -5,6 +5,7 @@ import (
 	_ "ni/websocket"
 
 	_ "app/cfg"
+	_ "app/score"
 	_ "app/user"
 	_ "app/wx"
 )

@@ -24,12 +24,14 @@ func init() {
 }
 
 // 用户注册
-func registUser(info interface{}, client *websocket.Client) (string, error) {
-
-	username := info.(map[string]interface{})["name"].(string)
-	gamename := info.(map[string]interface{})["gamename"].(string)
-	password := info.(map[string]interface{})["psw"].(string)
-	from := info.(map[string]interface{})["from"].(string)
+func registUser(info loginMessage, client *websocket.Client) (string, error) {
+	username := info.Username
+	gamename := info.Gamename
+	password := info.Password
+	from := info.From
+	if username == "" || gamename == "" || password == "" || from == "" {
+		return "", errors.New("arg error")
+	}
 	col, ctx, cancel := mongodb.Collection(gamename + "_user")
 	defer cancel()
 	filter := bson.M{"username": username}
@@ -41,6 +43,7 @@ func registUser(info interface{}, client *websocket.Client) (string, error) {
 	if err := cursor.Decode(&res); err != nil {
 		if err == mongo.ErrNoDocuments {
 			uid, err := temp.GetUID()
+			// fmt.Println(uid)
 			if err != nil {
 				return "", err
 			}
@@ -58,11 +61,13 @@ func registUser(info interface{}, client *websocket.Client) (string, error) {
 }
 
 // 用户登录
-func loginUser(info interface{}, client *websocket.Client) (string, error) {
-
-	username := info.(map[string]interface{})["name"].(string)
-	gamename := info.(map[string]interface{})["gamename"].(string)
-	password := info.(map[string]interface{})["psw"].(string)
+func loginUser(info loginMessage, client *websocket.Client) (string, error) {
+	username := info.Username
+	gamename := info.Gamename
+	password := info.Password
+	if username == "" || gamename == "" || password == "" {
+		return "", errors.New("arg error")
+	}
 	col, ctx, cancel := mongodb.Collection(gamename + "_user")
 	defer cancel()
 	filter := bson.M{"username": username}

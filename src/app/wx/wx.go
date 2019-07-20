@@ -3,6 +3,7 @@ package wx
 import (
 	"app/temp"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -53,7 +54,7 @@ func code2Session(code string, gameName string) (data *sessionResult, err error)
 		logger.Error(err.Error())
 		return nil, err
 	}
-	fmt.Println(body)
+	// fmt.Println(body)
 	return data, nil
 }
 
@@ -61,9 +62,18 @@ func code2Session(code string, gameName string) (data *sessionResult, err error)
 // 没有则注册
 func findUserByName(gamename string, info interface{}, client *websocket.Client) (string, error) {
 	col, ctx, cancel := mongodb.Collection(gamename + "_user")
-	username := info.(map[string]string)["openid"]
-	name := info.(map[string]string)["nickname"]
-	head := info.(map[string]string)["avatarUrl"]
+	username, ok := info.(map[string]string)["openid"]
+	if !ok {
+		return "", errors.New("arg error")
+	}
+	name, ok := info.(map[string]string)["nickname"]
+	if !ok {
+		return "", errors.New("arg error")
+	}
+	head, ok := info.(map[string]string)["avatarUrl"]
+	if !ok {
+		return "", errors.New("arg error")
+	}
 	from := "wx"
 	defer cancel()
 	filter := bson.M{"username": info.(map[string]string)["openid"]}
