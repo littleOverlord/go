@@ -4,7 +4,7 @@
     },
    "server":{
         "http":{
-            "port":"8017"
+            "port":"80"
         },
         "https":{
             "key":"src/app/tls/2122658_mgame.xianquyouxi.com.key",
