@@ -2,7 +2,6 @@
 package websocket
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -24,7 +23,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	maxMessageSize = 63 * 1024
 )
 
 var upgrader = websocket.Upgrader{
@@ -43,7 +42,7 @@ func init() {
 
 // serveWs handles websocket requests from the peer.
 func serveWs(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("socket start!")
+	// fmt.Println("socket start!")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logger.Error(err.Error())

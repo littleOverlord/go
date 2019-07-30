@@ -44,6 +44,14 @@ func AddClientToCache(uid int, c *Client) {
 	Clients.mux.Unlock()
 }
 
+// RemoveClientFromCache is remove the client connect from caches
+func RemoveClientFromCache(uid int) {
+	Clients.mux.Lock()
+	delete(Clients.caches, uid)
+	fmt.Println(len(Clients.caches))
+	Clients.mux.Unlock()
+}
+
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 
@@ -91,6 +99,9 @@ func (c *Client) readPump() {
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				logger.Error(err.Error())
+			}
+			if c.uid != 0 {
+				RemoveClientFromCache(c.uid)
 			}
 			break
 		}

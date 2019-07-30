@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"time"
 )
 
 func main() {
-	getJsonValue()
+	//getJsonValue()
+	formTime()
 }
 
 func getJsonValue() {
@@ -20,4 +22,9 @@ func getJsonValue() {
 		fmt.Println(err)
 	}
 	fmt.Println(string(r))
+}
+
+func formTime() {
+	t := time.Now().UnixNano() / 1000000
+	fmt.Println(t)
 }
