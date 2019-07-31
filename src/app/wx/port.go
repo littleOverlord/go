@@ -74,9 +74,7 @@ func login(message *websocket.ClientMessage, client *websocket.Client) error {
 	}
 
 	wxinfo, err := wxdc.Decrypt(encrypted, iv, false)
-	fmt.Println(wxinfo)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	uinfo, err := findUserByName(gamename, wxinfo, client)
