@@ -62,11 +62,11 @@ func code2Session(code string, gameName string) (data *sessionResult, err error)
 // 没有则注册
 func findUserByName(gamename string, info interface{}, client *websocket.Client) (string, error) {
 	col, ctx, cancel := mongodb.Collection(gamename + "_user")
-	username, ok := info.(map[string]interface{})["openid"].(string)
+	username, ok := info.(map[string]interface{})["openId"].(string)
 	if !ok {
 		return "", errors.New("arg error")
 	}
-	name, ok := info.(map[string]interface{})["nickname"].(string)
+	name, ok := info.(map[string]interface{})["nickName"].(string)
 	if !ok {
 		return "", errors.New("arg error")
 	}
@@ -76,7 +76,7 @@ func findUserByName(gamename string, info interface{}, client *websocket.Client)
 	}
 	from := "wx"
 	defer cancel()
-	filter := bson.M{"username": info.(map[string]interface{})["openid"].(string)}
+	filter := bson.M{"username": username}
 	var (
 		res userDB
 		msg string
