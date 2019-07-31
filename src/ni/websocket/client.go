@@ -117,7 +117,7 @@ func (c *Client) readPump() {
 		}
 		if err == nil {
 			data.ArgB = r
-			// fmt.Println(string(r))
+			fmt.Println(string(r))
 			go callHandler(&data, c)
 		} else {
 			logger.Error(fmt.Sprintf(`ws JSON Unmarshal failed: %s`, err.Error()))

@@ -9,11 +9,11 @@ import (
 )
 
 type sessionResult struct {
-	openid     string //用户唯一标识
-	sessionKey string //会话密钥
-	unionid    string //用户在开放平台的唯一标识符，在满足 UnionID 下发条件的情况下会返回，详见 UnionID 机制说明。
-	errcode    int    //错误码
-	errmsg     string
+	Openid     string `json:"openid"`      //用户唯一标识
+	SessionKey string `json:"session_key"` //会话密钥
+	Unionid    string `json:"unionid"`     //用户在开放平台的唯一标识符，在满足 UnionID 下发条件的情况下会返回，详见 UnionID 机制说明。
+	Errcode    int    `json:"errcode"`     //错误码
+	Errmsg     string `json:"errmsg"`
 }
 
 type loginMessage struct {
@@ -65,9 +65,12 @@ func login(message *websocket.ClientMessage, client *websocket.Client) error {
 	if err != nil {
 		return err
 	}
+	if sr.Errcode != 0 {
+		return fmt.Errorf("from wx error code: %d, error message: %s", sr.Errcode, sr.Errmsg)
+	}
 	wxdc := &WxBizDataCrypt{
 		AppID:      wxCfg[gamename].appID,
-		SessionKey: sr.sessionKey,
+		SessionKey: sr.SessionKey,
 	}
 
 	wxinfo, err := wxdc.Decrypt(encrypted, iv, false)
