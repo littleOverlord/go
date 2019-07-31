@@ -45,7 +45,9 @@ func login(message *websocket.ClientMessage, client *websocket.Client) error {
 	}
 	var err error
 	defer func() {
-		client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+		if err != nil {
+			client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+		}
 	}()
 	err = json.Unmarshal(message.ArgB, &arg)
 	if err != nil {

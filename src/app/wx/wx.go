@@ -60,7 +60,7 @@ func code2Session(code string, gameName string) (data *sessionResult, err error)
 // 获取微信用户在服务器的用户数据
 // 没有则注册
 func findUserByName(gamename string, info interface{}, client *websocket.Client) (string, error) {
-	col, ctx, cancel := mongodb.Collection(gamename + "_user")
+
 	username, ok := info.(map[string]interface{})["openId"].(string)
 	if !ok {
 		return "", errors.New("arg error")
@@ -74,6 +74,7 @@ func findUserByName(gamename string, info interface{}, client *websocket.Client)
 		return "", errors.New("arg error")
 	}
 	from := "wx"
+	col, ctx, cancel := mongodb.Collection(gamename + "_user")
 	defer cancel()
 	filter := bson.M{"username": username}
 	var (
