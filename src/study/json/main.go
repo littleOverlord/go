@@ -17,7 +17,7 @@ func getJsonValue() {
 	// json.Unmarshal(str, &data)
 	// arg, ok := data.(map[string]interface{})["arg"].(string)
 	// fmt.Println(arg, ok)
-	r, err := base64.StdEncoding.DecodeString("eyJhIjoxLCJiIjoiYXNkZmFzIn0=")
+	r, err := base64.StdEncoding.DecodeString("BiANdpdL4M198aB21pscng==")
 	if err != nil {
 		fmt.Println(err)
 	}
