@@ -54,7 +54,7 @@ func code2Session(code string, gameName string) (data *sessionResult, err error)
 		logger.Error(err.Error())
 		return nil, err
 	}
-	// fmt.Println(body)
+	fmt.Println(data)
 	return data, nil
 }
 
