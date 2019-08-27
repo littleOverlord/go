@@ -37,9 +37,12 @@ func SendMany(uids []int, text string) {
 }
 
 // AddClientToCache is add one client to cache
-func AddClientToCache(uid int, c *Client) {
+func AddClientToCache(uid int, name string, head string, from string, c *Client) {
 	Clients.mux.Lock()
 	c.uid = uid
+	c.name = name
+	c.head = head
+	c.from = from
 	Clients.caches[uid] = c
 	Clients.mux.Unlock()
 }
@@ -63,6 +66,12 @@ type Client struct {
 
 	// user id
 	uid int
+	//user nickname
+	name string
+	//user platform
+	from string
+	//user head image url
+	head string
 }
 
 // ClientMessage is from client

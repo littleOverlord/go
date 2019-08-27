@@ -17,6 +17,22 @@ func init() {
 }
 
 func readScore(message *websocket.ClientMessage, client *websocket.Client) error {
+	var err error
+
+	defer func() {
+		if err != nil {
+			client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+		}
+	}()
+	err = json.Unmarshal(message.ArgB, &arg)
+	if err != nil {
+		return err
+	}
+	uinfo, err := registUser(arg, client)
+	if err != nil {
+		return err
+	}
+	client.SendMessage(message, fmt.Sprintf(`{"ok": %s}`, uinfo))
 	return nil
 }
 

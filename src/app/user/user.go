@@ -51,7 +51,7 @@ func registUser(info loginMessage, client *websocket.Client) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			go websocket.AddClientToCache(uid, client)
+			go websocket.AddClientToCache(uid, "", "", from, client)
 			msg = fmt.Sprintf(`{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s"}`, uid, username, "", from, "")
 			return msg, nil
 		}
@@ -81,7 +81,7 @@ func loginUser(info loginMessage, client *websocket.Client) (string, error) {
 	} else if res.Password != password {
 		return "", errors.New("login error")
 	}
-	websocket.AddClientToCache(res.UID, client)
+	websocket.AddClientToCache(res.UID, res.Name, res.Head, res.From, client)
 	msg = fmt.Sprintf(`{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s"}`, res.UID, res.Username, res.Name, res.From, res.Head)
 	return msg, nil
 }
