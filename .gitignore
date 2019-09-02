@@ -2,5 +2,6 @@
 **/pkg
 **/github.com
 **/golang.org
+**/go.mongodb.org
 back/db/
 back/log/
