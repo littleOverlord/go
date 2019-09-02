@@ -37,12 +37,13 @@ func SendMany(uids []int, text string) {
 }
 
 // AddClientToCache is add one client to cache
-func AddClientToCache(uid int, name string, head string, from string, c *Client) {
+func AddClientToCache(uid int, name string, head string, from string, game string, c *Client) {
 	Clients.mux.Lock()
-	c.uid = uid
-	c.name = name
-	c.head = head
-	c.from = from
+	c.UID = uid
+	c.Name = name
+	c.Head = head
+	c.From = from
+	c.Game = game
 	Clients.caches[uid] = c
 	Clients.mux.Unlock()
 }
@@ -65,13 +66,15 @@ type Client struct {
 	send chan []byte
 
 	// user id
-	uid int
+	UID int
 	//user nickname
-	name string
+	Name string
 	//user platform
-	from string
+	From string
 	//user head image url
-	head string
+	Head string
+	//game name
+	Game string
 }
 
 // ClientMessage is from client
@@ -109,8 +112,8 @@ func (c *Client) readPump() {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				logger.Error(err.Error())
 			}
-			if c.uid != 0 {
-				RemoveClientFromCache(c.uid)
+			if c.UID != 0 {
+				RemoveClientFromCache(c.UID)
 			}
 			break
 		}
