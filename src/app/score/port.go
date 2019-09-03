@@ -20,5 +20,11 @@ func port() {
 	}
 	**/
 	websocket.RegistHandler("app/score@add", addScore)
+	/**
+	return
+	{
+		"rank":""||[] 前三名，加自己的前后三名，共10个人
+	}
+	**/
 	websocket.RegistHandler("app/score@rank", readRank)
 }
