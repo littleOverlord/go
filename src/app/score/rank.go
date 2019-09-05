@@ -25,10 +25,9 @@ type rankDB struct {
 	List []*rankItem `bson:"list" json:"list"`
 }
 
-// rank handle struct
-type caclRank struct {
-	DB  rankDB
-	add chan *rankItem
+// channels for controling rank update && get
+type channels struct {
+	add chan *addArg
 	get chan *readArg
 }
 
@@ -38,9 +37,19 @@ type readArg struct {
 	client  *websocket.Client
 }
 
+type addArg struct {
+	ri     *rankItem
+	client *websocket.Client
+}
+
 var (
 	// all game all platform rank map
-	ranks = make(map[string]*caclRank)
+	ranks = make(map[string]*rankDB)
+	// the channels for controling rank update && get
+	rankChan = channels{
+		add: make(chan *addArg, 100),
+		get: make(chan *readArg, 100),
+	}
 )
 
 // init rank db from mongodb to memory
@@ -63,36 +72,84 @@ func initRank() error {
 		if err = cursor.Decode(&res); err != nil {
 			return err
 		}
-		ranks[res.Game+res.From] = &caclRank{
-			DB:  res,
-			add: make(chan *rankItem, 100),
-		}
-		go ranks[res.Game+res.From].cacle()
+		ranks[res.Game+res.From] = &res
 	}
 	return nil
 }
 
 // read rank interface for client
 func readRank(message *websocket.ClientMessage, client *websocket.Client) error {
-	cr := ranks[client.Game+client.From]
-	if cr == nil {
-		client.SendMessage(message, `{"ok":{"rank":"",top:0}}`)
-		return nil
-	}
-	cr.get <- &readArg{message, client}
+	rankChan.get <- &readArg{message, client}
 	return nil
 }
 
+// check db has rank && return *caclRank
+func checkDBHasRank(game string, from string) (*rankDB, error) {
+	col, ctx, cancel := mongodb.Collection("rank")
+	defer cancel()
+
+	filter := bson.M{"game": game, "from": from}
+	cursor := col.FindOne(ctx, filter)
+	var res rankDB
+	if err := cursor.Decode(&res); err != nil {
+		logger.Error("rank.checkDBHasRank error : " + err.Error())
+		return nil, err
+	}
+	ranks[res.Game+res.From] = &res
+	return ranks[res.Game+res.From], nil
+}
+
+// update rank
+func updateRank(ri *rankItem, client *websocket.Client) (rd *rankDB, err error) {
+	rd = ranks[client.Game+client.From]
+	if rd == nil {
+		rd, err = checkDBHasRank(client.Game, client.From)
+		if err != nil {
+			return nil, err
+		}
+		if rd == nil {
+			rd = &rankDB{
+				Game: client.Game,
+				From: client.From,
+				List: []*rankItem{ri},
+			}
+			err = saveRank(rd)
+			if err != nil {
+				return nil, err
+			}
+			ranks[client.Game+client.From] = rd
+			return nil, nil
+
+		}
+
+	}
+	return rd, nil
+}
+
+// save rank to mongodb
+func saveRank(rd *rankDB) error {
+	col, ctx, cancel := mongodb.Collection("rank")
+	defer cancel()
+	_, err := col.InsertOne(ctx, rd)
+	return err
+}
+
 // read rank handler
-func (cr *caclRank) read(ar *readArg) {
+func sendRank(ar *readArg) error {
 	var (
+		rd     = ranks[ar.client.Game+ar.client.From]
 		index  int
 		inTop  bool
-		length = len(cr.DB.List)
+		length int
 		end    int
 		r      []*rankItem
 	)
-	for i, v := range cr.DB.List {
+	if rd == nil {
+		ar.client.SendMessage(ar.message, `{"ok":{"rank":"",top:0}}`)
+		return nil
+	}
+	length = len(rd.List)
+	for i, v := range rd.List {
 		inTop = v.UID == ar.client.UID
 		if inTop {
 			index = i
@@ -105,12 +162,12 @@ func (cr *caclRank) read(ar *readArg) {
 		if end > length {
 			end = length
 		}
-		r = append(cr.DB.List[0:3], cr.DB.List[index-3:end]...)
+		r = append(rd.List[0:3], rd.List[index-3:end]...)
 	} else {
 		if end > length {
 			end = length
 		}
-		r = cr.DB.List[0:end]
+		r = rd.List[0:end]
 	}
 	sr, err := json.Marshal(r)
 	if err != nil {
@@ -118,37 +175,99 @@ func (cr *caclRank) read(ar *readArg) {
 	} else {
 		ar.client.SendMessage(ar.message, fmt.Sprintf(`{"ok":{"rank":%s,"top":%d}}`, string(sr), index))
 	}
+	return err
 }
 
 // add one score and resort the rank list
-func (cr *caclRank) sort(ri *rankItem) {
-	len := len(cr.DB.List)
+func sortRank(ada *addArg) {
+	var (
+		rd, err = updateRank(ada.ri, ada.client)
+	)
+	if rd == nil {
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		return
+	}
 
-	if ri.Score >= cr.DB.List[0].Score {
-		cr.DB.List = sliceInsert(cr.DB.List, 0, ri)
+	leng := len(rd.List)
+
+	if ada.ri.Score >= rd.List[0].Score {
+		rd.List = sliceInsert(rd.List, 0, ada.ri)
+	} else if ada.ri.Score >= rd.List[leng-1].Score {
+		rd.List = sliceInsert(rd.List, halfInsert(rd, ada.ri), ada.ri)
+	} else if leng < 100 {
+		rd.List = append(rd.List, ada.ri)
+	} else {
+		return
+	}
+	leng = len(rd.List)
+	if leng > 100 {
+		rd.List = rd.List[:100]
+	}
+	col, ctx, cancel := mongodb.Collection("rank")
+	defer cancel()
+
+	filter := bson.M{"game": rd.Game, "from": rd.From}
+	_, err = col.UpdateOne(ctx, filter, bson.M{"$set": bson.M{"list": rd.List}})
+	if err != nil {
+		logger.Error(err.Error())
 	}
 }
 
+// dichotomy insert rank
+func halfInsert(rd *rankDB, ri *rankItem) int {
+	var (
+		prev   = 0
+		last   = len(rd.List) - 1
+		i      = (last / 2) + 1
+		ti     int
+		offset = 0
+	)
+
+	for {
+		i = ti
+		if rd.List[i].Score > ri.Score {
+			ti = i + (last-i)/2
+			prev = i
+			if ti == i {
+				i = i + 1
+				ti = i
+			}
+		} else if rd.List[i].Score < ri.Score {
+			ti = prev + (i-prev)/2
+			last = i
+			if ti == i {
+				i = i - 1
+				ti = i
+			}
+		}
+		if ti == i {
+			break
+		}
+	}
+	return ti
+}
+
 // rank channels
-func (cr *caclRank) cacle() {
+func (rc *channels) cacl() {
 	defer func() {
 		if p := recover(); p != nil {
 			logger.Error(p.(string))
-			delete(ranks, cr.DB.Game+cr.DB.From)
 		}
 	}()
 	for {
 		select {
-		case c, ok := <-cr.get:
+		case ar, ok := <-rc.get:
 			if !ok {
 				panic("read caclRank.get chan fail")
 			}
-			cr.read(c)
-		case ri, ok := <-cr.add:
+			sendRank(ar)
+		case ada, ok := <-rc.add:
 			if !ok {
 				panic("read caclRank.add chan fail")
 			}
-			cr.sort(ri)
+			sortRank(ada)
 		}
 	}
 }

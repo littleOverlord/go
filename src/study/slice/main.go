@@ -6,7 +6,7 @@ import (
 
 func main() {
 	var a = []int{1, 3, 4, 5, 3, 2, 67, 8, 85, 4, 5}
-
+	fmt.Println(3 / 2)
 	temp := sliceInsert(a, 0, 400)
 	// a = append(temp, a[0:]...)
 	fmt.Println(temp)
