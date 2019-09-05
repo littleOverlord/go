@@ -218,11 +218,10 @@ func sortRank(ada *addArg) {
 // dichotomy insert rank
 func halfInsert(rd *rankDB, ri *rankItem) int {
 	var (
-		prev   = 0
-		last   = len(rd.List) - 1
-		i      = (last / 2) + 1
-		ti     int
-		offset = 0
+		prev = 0
+		last = len(rd.List) - 1
+		i    = (last / 2) + 1
+		ti   int
 	)
 
 	for {
