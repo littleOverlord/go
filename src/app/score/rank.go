@@ -20,9 +20,9 @@ type rankItem struct {
 
 // rank db of per game and per platform
 type rankDB struct {
-	Game string      `bson:"game" json:"game"`
-	From string      `bson:"from" json:"from"`
-	List []*rankItem `bson:"list" json:"list"`
+	Game string     `bson:"game" json:"game"`
+	From string     `bson:"from" json:"from"`
+	List []rankItem `bson:"list" json:"list"`
 }
 
 // channels for controling rank update && get
@@ -38,7 +38,7 @@ type readArg struct {
 }
 
 type addArg struct {
-	ri     *rankItem
+	ri     rankItem
 	client *websocket.Client
 }
 
@@ -73,7 +73,9 @@ func initRank() error {
 			return err
 		}
 		ranks[res.Game+res.From] = &res
+		fmt.Println(res.Game)
 	}
+	fmt.Println(ranks)
 	return nil
 }
 
@@ -111,7 +113,7 @@ func updateRank(ri *rankItem, client *websocket.Client) (rd *rankDB, err error) 
 			rd = &rankDB{
 				Game: client.Game,
 				From: client.From,
-				List: []*rankItem{ri},
+				List: []rankItem{*ri},
 			}
 			err = saveRank(rd)
 			if err != nil {
@@ -130,7 +132,7 @@ func updateRank(ri *rankItem, client *websocket.Client) (rd *rankDB, err error) 
 func saveRank(rd *rankDB) error {
 	col, ctx, cancel := mongodb.Collection("rank")
 	defer cancel()
-	_, err := col.InsertOne(ctx, rd)
+	_, err := col.InsertOne(ctx, *rd)
 	return err
 }
 
@@ -142,10 +144,10 @@ func sendRank(ar *readArg) error {
 		inTop  bool
 		length int
 		end    int
-		r      []*rankItem
+		r      []rankItem
 	)
 	if rd == nil {
-		ar.client.SendMessage(ar.message, `{"ok":{"rank":"",top:0}}`)
+		ar.client.SendMessage(ar.message, `{"ok":{"rank":"","top":0}}`)
 		return nil
 	}
 	length = len(rd.List)
@@ -171,7 +173,7 @@ func sendRank(ar *readArg) error {
 	}
 	sr, err := json.Marshal(r)
 	if err != nil {
-		ar.client.SendMessage(ar.message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+		ar.client.SendMessage(ar.message, fmt.Sprintf(`{"err":{"reson":"%s"}}`, err.Error()))
 	} else {
 		ar.client.SendMessage(ar.message, fmt.Sprintf(`{"ok":{"rank":%s,"top":%d}}`, string(sr), index))
 	}
@@ -181,7 +183,7 @@ func sendRank(ar *readArg) error {
 // add one score and resort the rank list
 func sortRank(ada *addArg) {
 	var (
-		rd, err = updateRank(ada.ri, ada.client)
+		rd, err = updateRank(&ada.ri, ada.client)
 	)
 	if rd == nil {
 		if err != nil {
@@ -193,9 +195,9 @@ func sortRank(ada *addArg) {
 	leng := len(rd.List)
 
 	if ada.ri.Score >= rd.List[0].Score {
-		rd.List = sliceInsert(rd.List, 0, ada.ri)
+		rd.List = sliceInsert(rd.List, 0, &ada.ri)
 	} else if ada.ri.Score >= rd.List[leng-1].Score {
-		rd.List = sliceInsert(rd.List, halfInsert(rd, ada.ri), ada.ri)
+		rd.List = sliceInsert(rd.List, halfInsert(rd, &ada.ri), &ada.ri)
 	} else if leng < 100 {
 		rd.List = append(rd.List, ada.ri)
 	} else {
@@ -272,9 +274,9 @@ func (rc *channels) cacl() {
 }
 
 // insert one element to a slice
-func sliceInsert(s []*rankItem, i int, el *rankItem) []*rankItem {
-	n := []*rankItem{el}
-	start := append([]*rankItem{}, s[0:i]...)
+func sliceInsert(s []rankItem, i int, el *rankItem) []rankItem {
+	n := []rankItem{*el}
+	start := append([]rankItem{}, s[0:i]...)
 	end := s[i:]
 	start = append(start, n...)
 	end = append(start, end...)

@@ -38,7 +38,7 @@ func regist(message *websocket.ClientMessage, client *websocket.Client) error {
 
 	defer func() {
 		if err != nil {
-			client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+			client.SendMessage(message, fmt.Sprintf(`{"err":{"reson":"%s"}}`, err.Error()))
 		}
 	}()
 	err = json.Unmarshal(message.ArgB, &arg)
@@ -63,7 +63,7 @@ func login(message *websocket.ClientMessage, client *websocket.Client) error {
 	var err error
 	defer func() {
 		if err != nil {
-			client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+			client.SendMessage(message, fmt.Sprintf(`{"err":{"reson":"%s"}}`, err.Error()))
 		}
 	}()
 	err = json.Unmarshal(message.ArgB, &arg)

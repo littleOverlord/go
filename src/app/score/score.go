@@ -72,7 +72,7 @@ func addScore(message *websocket.ClientMessage, client *websocket.Client) error 
 	)
 	defer func() {
 		if err != nil {
-			client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
+			client.SendMessage(message, fmt.Sprintf(`{"err":{"reson":"%s"}}`, err.Error()))
 		}
 	}()
 	err = json.Unmarshal(message.ArgB, &arg)
@@ -109,7 +109,7 @@ func addScore(message *websocket.ClientMessage, client *websocket.Client) error 
 	}
 	client.SendMessage(message, `{"ok": "ok"}`)
 	rankChan.add <- &addArg{
-		ri: &rankItem{
+		ri: rankItem{
 			UID:   client.UID,
 			Score: arg.Score,
 			Name:  client.Name,

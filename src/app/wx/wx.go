@@ -92,13 +92,13 @@ func findUserByName(gamename string, info interface{}, client *websocket.Client)
 			if err != nil {
 				return "", err
 			}
-			go websocket.AddClientToCache(uid, client)
+			go websocket.AddClientToCache(uid, name, head, from, gamename, client)
 			msg = fmt.Sprintf(`{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s"}`, uid, username, name, from, head)
 		} else {
 			return "", err
 		}
 	} else {
-		go websocket.AddClientToCache(res.UID, client)
+		go websocket.AddClientToCache(res.UID, name, head, from, gamename, client)
 		msg = fmt.Sprintf(`{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s"}`, res.UID, res.Username, res.Name, res.From, res.Head)
 	}
 	return msg, nil
