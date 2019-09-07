@@ -2,12 +2,14 @@ package score
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"ni/logger"
 	"ni/mongodb"
 	"ni/websocket"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // rank user info
@@ -94,7 +96,10 @@ func checkDBHasRank(game string, from string) (*rankDB, error) {
 	cursor := col.FindOne(ctx, filter)
 	var res rankDB
 	if err := cursor.Decode(&res); err != nil {
-		logger.Error("rank.checkDBHasRank error : " + err.Error())
+		if err == mongo.ErrNoDocuments {
+			err = nil
+		}
+
 		return nil, err
 	}
 	ranks[res.Game+res.From] = &res
@@ -107,7 +112,7 @@ func updateRank(ri *rankItem, client *websocket.Client) (rd *rankDB, err error) 
 	if rd == nil {
 		rd, err = checkDBHasRank(client.Game, client.From)
 		if err != nil {
-			return nil, err
+			return nil, errors.New("rank.checkDBHasRank ::: " + err.Error())
 		}
 		if rd == nil {
 			rd = &rankDB{
@@ -117,13 +122,13 @@ func updateRank(ri *rankItem, client *websocket.Client) (rd *rankDB, err error) 
 			}
 			err = saveRank(rd)
 			if err != nil {
-				return nil, err
+				return nil, errors.New("rank.saveRank ::: " + err.Error())
 			}
 			ranks[client.Game+client.From] = rd
 			return nil, nil
 
 		}
-
+		ranks[client.Game+client.From] = rd
 	}
 	return rd, nil
 }
@@ -213,7 +218,7 @@ func sortRank(ada *addArg) {
 	filter := bson.M{"game": rd.Game, "from": rd.From}
 	_, err = col.UpdateOne(ctx, filter, bson.M{"$set": bson.M{"list": rd.List}})
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("rank.sortRank ::: " + err.Error())
 	}
 }
 
