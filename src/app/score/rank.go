@@ -196,13 +196,16 @@ func sortRank(ada *addArg) {
 		}
 		return
 	}
-
+	hasIndex := sameIndex(rd.List, &(ada.ri))
+	if hasIndex >= 0 {
+		removeRepeat(rd.List, hasIndex)
+	}
 	leng := len(rd.List)
 
 	if ada.ri.Score >= rd.List[0].Score {
-		rd.List = sliceInsert(rd.List, 0, &ada.ri)
+		rd.List = sliceInsert(rd.List, 0, &(ada.ri))
 	} else if ada.ri.Score >= rd.List[leng-1].Score {
-		rd.List = sliceInsert(rd.List, halfInsert(rd, &ada.ri), &ada.ri)
+		rd.List = sliceInsert(rd.List, halfInsert(rd, &(ada.ri)), &(ada.ri))
 	} else if leng < 100 {
 		rd.List = append(rd.List, ada.ri)
 	} else {
@@ -286,4 +289,19 @@ func sliceInsert(s []rankItem, i int, el *rankItem) []rankItem {
 	start = append(start, n...)
 	end = append(start, end...)
 	return end
+}
+
+// remove repeat one
+func removeRepeat(s []rankItem, i int) []rankItem {
+	return append(s[:i], s[i+1:]...)
+}
+
+// find the index of same user in ranks list
+func sameIndex(s []rankItem, el *rankItem) int {
+	for i, v := range s {
+		if v.UID == el.UID {
+			return i
+		}
+	}
+	return -1
 }
