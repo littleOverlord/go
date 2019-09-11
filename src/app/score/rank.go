@@ -205,7 +205,9 @@ func sortRank(ada *addArg) {
 	rd.List = removeSame(rd.List, &(ada.ri))
 	leng := len(rd.List)
 
-	if ada.ri.Score >= rd.List[0].Score {
+	if leng == 0 {
+		rd.List[0] = ada.ri
+	} else if ada.ri.Score >= rd.List[0].Score {
 		rd.List = sliceInsert(rd.List, 0, &(ada.ri))
 	} else if ada.ri.Score >= rd.List[leng-1].Score {
 		rd.List = sliceInsert(rd.List, halfInsert(rd, &(ada.ri)), &(ada.ri))
