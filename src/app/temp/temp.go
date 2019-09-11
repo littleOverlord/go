@@ -48,6 +48,7 @@ func initUID() {
 	cursor := col.FindOne(ctx, filter)
 	if err := cursor.Decode(&lastUID); err != nil {
 		if err == mongo.ErrNoDocuments {
+			lastUID.Value = 10000
 			_, err := col.InsertOne(ctx, bson.M{"key": "uid", "value": 10000})
 			if err != nil {
 				panic(err.Error())

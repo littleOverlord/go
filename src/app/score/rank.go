@@ -145,14 +145,15 @@ func saveRank(rd *rankDB) error {
 func sendRank(ar *readArg) error {
 	var (
 		rd     = ranks[ar.client.Game+ar.client.From]
-		index  int
+		index  = -1
 		inTop  bool
 		length int
+		start  = 3
 		end    int
 		r      []rankItem
 	)
 	if rd == nil {
-		ar.client.SendMessage(ar.message, `{"ok":{"rank":"","top":0}}`)
+		ar.client.SendMessage(ar.message, `{"ok":{"rank":"","top":0,"start":-1}}`)
 		return nil
 	}
 	length = len(rd.List)
@@ -165,11 +166,16 @@ func sendRank(ar *readArg) error {
 	}
 	end = 10
 	if index > 6 {
+		start = index - 3
 		end = index + 4
 		if end > length {
 			end = length
 		}
-		r = append(rd.List[0:3], rd.List[index-3:end]...)
+		r = append(rd.List[0:3], rd.List[start:end]...)
+	} else if index == -1 && length > 10 {
+		start = length - 7
+		end = length
+		r = append(rd.List[0:3], rd.List[start:end]...)
 	} else {
 		if end > length {
 			end = length
@@ -180,7 +186,7 @@ func sendRank(ar *readArg) error {
 	if err != nil {
 		ar.client.SendMessage(ar.message, fmt.Sprintf(`{"err":{"reson":"%s"}}`, err.Error()))
 	} else {
-		ar.client.SendMessage(ar.message, fmt.Sprintf(`{"ok":{"rank":%s,"top":%d}}`, string(sr), index))
+		ar.client.SendMessage(ar.message, fmt.Sprintf(`{"ok":{"rank":%s,"top":%d,"start":%d}}`, string(sr), index, start))
 	}
 	return err
 }
@@ -196,10 +202,7 @@ func sortRank(ada *addArg) {
 		}
 		return
 	}
-	hasIndex := sameIndex(rd.List, &(ada.ri))
-	if hasIndex >= 0 {
-		removeRepeat(rd.List, hasIndex)
-	}
+	rd.List = removeSame(rd.List, &(ada.ri))
 	leng := len(rd.List)
 
 	if ada.ri.Score >= rd.List[0].Score {
@@ -291,17 +294,14 @@ func sliceInsert(s []rankItem, i int, el *rankItem) []rankItem {
 	return end
 }
 
-// remove repeat one
-func removeRepeat(s []rankItem, i int) []rankItem {
-	return append(s[:i], s[i+1:]...)
-}
-
 // find the index of same user in ranks list
-func sameIndex(s []rankItem, el *rankItem) int {
-	for i, v := range s {
-		if v.UID == el.UID {
-			return i
+func removeSame(s []rankItem, el *rankItem) []rankItem {
+	i := 0
+	for _, v := range s {
+		if v.UID != el.UID {
+			s[i] = v
+			i++
 		}
 	}
-	return -1
+	return s[:i]
 }
