@@ -23,7 +23,7 @@ var (
 // Connect is connecting to mongodb server
 func init() {
 	url = config.Table["app/main/config.json"].(map[string]interface{})["db"].(map[string]interface{})["url"].(string)
-	// dbName = config.Table["app/main/config.json"].(map[string]interface{})["db"].(map[string]interface{})["name"].(string)
+	dbName = config.Table["app/main/config.json"].(map[string]interface{})["db"].(map[string]interface{})["name"].(string)
 	_ctx := context.Background()
 	defer func() {
 		if p := recover(); p != nil {
