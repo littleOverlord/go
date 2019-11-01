@@ -8,7 +8,7 @@ import (
 	"os"
 	"path"
 
-	"ni/util"
+	"mgame-go/ni/util"
 )
 
 //Table 配置缓存表

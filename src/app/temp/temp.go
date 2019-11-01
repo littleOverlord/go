@@ -2,8 +2,8 @@ package temp
 
 import (
 	"fmt"
-	"ni/logger"
-	"ni/mongodb"
+	"mgame-go/ni/logger"
+	"mgame-go/ni/mongodb"
 	"sync"
 
 	"go.mongodb.org/mongo-driver/mongo"

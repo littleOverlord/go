@@ -3,7 +3,7 @@ package websocket
 
 import (
 	"fmt"
-	"ni/logger"
+	"mgame-go/ni/logger"
 )
 
 var handlers = make(map[string]WsHandler)

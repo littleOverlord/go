@@ -23,7 +23,7 @@ dbpath="${basepath}/db"
 # 检查创建db log目录
 if [ ! -d "log" ];
 then
-sudo mkdir log
+sudo mkdir -m 777 log
 fi
 if [ ! -f "/log/mongodb.log" ];
 then

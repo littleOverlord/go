@@ -3,11 +3,11 @@ package router
 
 import (
 	"fmt"
-	"net/url"
 	"net/http"
+	"net/url"
 
-	"ni/logger"
-	"ni/static"
+	"mgame-go/ni/logger"
+	"mgame-go/ni/static"
 )
 
 // 路由注册函数类型
@@ -17,60 +17,60 @@ type HttpHandler func(w http.ResponseWriter, req *http.Request) error
 var httpHandlers map[string]HttpHandler
 
 // 分发路由
-func Distribute(w http.ResponseWriter, req *http.Request) error{
+func Distribute(w http.ResponseWriter, req *http.Request) error {
 	err := req.ParseForm()
 	if err != nil {
 		return err
 	}
-	key,er := getClientInterface(req)
+	key, er := getClientInterface(req)
 	if er != nil {
 		return er
 	}
 	f := httpHandlers[key]
 	if f != nil {
 		fmt.Println(key)
-		e := f(w,req)
+		e := f(w, req)
 		return e
-	}else{
+	} else {
 		static.Response(w, req)
 	}
 	return nil
 }
 
 // 添加路由
-func AddHH(key string, handler HttpHandler){
-	defer func(){
+func AddHH(key string, handler HttpHandler) {
+	defer func() {
 		if p := recover(); p != nil {
 			// fmt.Println(p)
 			logger.Error(p.(string))
-        }
+		}
 	}()
 	f := httpHandlers[key]
-	if f == nil{
-		panic(fmt.Sprintf("Have the same handler of '%s'",key))
+	if f == nil {
+		panic(fmt.Sprintf("Have the same handler of '%s'", key))
 	}
 	httpHandlers[key] = handler
 }
 
 // 获取前端接口
-func getClientInterface(req *http.Request) (string , error){
+func getClientInterface(req *http.Request) (string, error) {
 	u, e := url.Parse(req.RequestURI)
-	if e != nil{
+	if e != nil {
 		return "", e
 	}
 	at := req.Form["@"]
 	key := ""
-	if at != nil{
-		key = "@"+at[0]
+	if at != nil {
+		key = "@" + at[0]
 	}
 	return u.Path + key, nil
 }
 
-// 打印 http.Request.Form 
-func rangeFromValues(req *http.Request){
-	for key,value := range req.Form{
-		
-		for i, el := range value{
+// 打印 http.Request.Form
+func rangeFromValues(req *http.Request) {
+	for key, value := range req.Form {
+
+		for i, el := range value {
 			fmt.Println(key, i, el)
 		}
 	}

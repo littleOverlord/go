@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"ni/logger"
-	"ni/mongodb"
-	"ni/websocket"
+	"mgame-go/ni/logger"
+	"mgame-go/ni/mongodb"
+	"mgame-go/ni/websocket"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -206,7 +206,7 @@ func sortRank(ada *addArg) {
 	leng := len(rd.List)
 
 	if leng == 0 {
-		rd.List = append(rd.List,ada.ri)
+		rd.List = append(rd.List, ada.ri)
 	} else if ada.ri.Score >= rd.List[0].Score {
 		rd.List = sliceInsert(rd.List, 0, &(ada.ri))
 	} else if ada.ri.Score >= rd.List[leng-1].Score {

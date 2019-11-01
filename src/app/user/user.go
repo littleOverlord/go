@@ -1,11 +1,11 @@
 package user
 
 import (
-	"app/temp"
 	"errors"
 	"fmt"
-	"ni/mongodb"
-	"ni/websocket"
+	"mgame-go/app/temp"
+	"mgame-go/ni/mongodb"
+	"mgame-go/ni/websocket"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

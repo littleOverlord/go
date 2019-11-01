@@ -2,7 +2,7 @@ package temp
 
 import (
 	"fmt"
-	"ni/websocket"
+	"mgame-go/ni/websocket"
 	"time"
 )
 

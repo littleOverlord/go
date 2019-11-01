@@ -33,6 +33,14 @@ pkg：包文件
 
 bin：相关bin文件
 
+## 卸载
+
+> rm -rf /usr/local/go
+
+> rm -rf /etc/paths.d/go
+
+> vim ~/.bash_profile
+
 ## 包
 ### 包导入
 +相对路径

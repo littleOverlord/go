@@ -9,8 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"ni/config"
-	"ni/logger"
+	"mgame-go/ni/config"
+	"mgame-go/ni/logger"
 )
 
 var (

@@ -1,4 +1,4 @@
-package wx
+package xhb
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"mgame-go/app/temp"
-	"mgame-go/ni/config"
 	"mgame-go/ni/logger"
 	"mgame-go/ni/mongodb"
 	"mgame-go/ni/websocket"
@@ -16,29 +15,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var wxCfg = make(map[string]*wxProject)
-
 type wxProject struct {
 	appID     string
 	appSecret string
 }
 
 func init() {
-	initCfg()
 	// regist ws(s) handlers
 	port()
 }
 
-func initCfg() {
-	cfg := config.Table["app/main/config.json"].(map[string]interface{})["wx"].(map[string]interface{})
-	for k, v := range cfg {
-		wxCfg[k] = &wxProject{appID: v.(map[string]interface{})["appID"].(string), appSecret: v.(map[string]interface{})["appSecret"].(string)}
-	}
-}
-
-// 从微信服务器获取session
-func code2Session(code string, gameName string) (data *sessionResult, err error) {
-	resp, err := http.Get(fmt.Sprintf(`https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code`, wxCfg[gameName].appID, wxCfg[gameName].appSecret, code))
+// 从小伙伴服务器获取用户信息
+func getUserInfo(arg *loginMessage) (data *sessionResult, err error) {
+	resp, err := http.Get(fmt.Sprintf(`https://gc.hgame.com/user/getticketuserinfo?game_key=%s&timestamp=%s&nonce=%s&login_type=%s&login_ticket=%s&signature=%s`, arg.GameKey, arg.Timestamp, arg.Nonce, arg.LoginType, arg.LoginTicket, arg.Signature))
 	if err != nil {
 		// handle error
 		return nil, err
@@ -57,7 +46,7 @@ func code2Session(code string, gameName string) (data *sessionResult, err error)
 	return data, nil
 }
 
-// 获取微信用户在服务器的用户数据
+// 获取小伙伴用户在服务器的用户数据
 // 没有则注册
 func findUserByName(gamename string, info interface{}, client *websocket.Client) (string, error) {
 

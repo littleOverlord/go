@@ -3,9 +3,9 @@ package score
 import (
 	"encoding/json"
 	"fmt"
-	"ni/mongodb"
-	"ni/util"
-	"ni/websocket"
+	"mgame-go/ni/mongodb"
+	"mgame-go/ni/util"
+	"mgame-go/ni/websocket"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"

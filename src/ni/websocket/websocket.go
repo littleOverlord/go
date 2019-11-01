@@ -7,9 +7,9 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"ni/config"
-	"ni/logger"
-	"ni/server"
+	"mgame-go/ni/config"
+	"mgame-go/ni/logger"
+	"mgame-go/ni/server"
 )
 
 const (

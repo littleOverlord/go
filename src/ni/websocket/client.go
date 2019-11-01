@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"ni/logger"
+	"mgame-go/ni/logger"
 )
 
 // Clients is all logined client cache list

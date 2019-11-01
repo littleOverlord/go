@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"ni/websocket"
+	"mgame-go/ni/websocket"
 )
 
 type sessionResult struct {

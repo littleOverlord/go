@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"ni/websocket"
+	"mgame-go/ni/websocket"
 )
 
 type loginMessage struct {

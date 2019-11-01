@@ -2,7 +2,7 @@ package score
 
 import (
 	"fmt"
-	"ni/mongodb"
+	"mgame-go/ni/mongodb"
 	"testing"
 	"time"
 

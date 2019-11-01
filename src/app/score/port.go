@@ -1,7 +1,7 @@
 package score
 
 import (
-	"ni/websocket"
+	"mgame-go/ni/websocket"
 )
 
 func port() {

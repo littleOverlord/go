@@ -8,10 +8,10 @@ import (
 	"path"
 	"time"
 
-	"ni/config"
-	"ni/logger"
-	"ni/router"
-	"ni/util"
+	"mgame-go/ni/config"
+	"mgame-go/ni/logger"
+	"mgame-go/ni/router"
+	"mgame-go/ni/util"
 )
 
 // http处理函数类型

@@ -1,2 +1,3 @@
-cd ../../src/app/main
-go run main.go
+ cd ../../src/app/main
+ #go run mgame.go
+mgame

@@ -1,12 +1,12 @@
 package main
 
 import (
-	_ "ni/server"
-	_ "ni/websocket"
+	_ "mgame-go/ni/server"
+	_ "mgame-go/ni/websocket"
 
-	_ "app/score"
-	_ "app/user"
-	_ "app/wx"
+	_ "mgame-go/app/score"
+	_ "mgame-go/app/user"
+	_ "mgame-go/app/wx"
 )
 
 func main() {

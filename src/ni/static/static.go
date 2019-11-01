@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"strings"
 
-	"ni/config"
-	"ni/util"
+	"mgame-go/ni/config"
+	"mgame-go/ni/util"
 )
 
 // 不应用gzip压缩的文件格式
