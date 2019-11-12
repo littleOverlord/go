@@ -4,6 +4,7 @@
 **/golang.org
 **/go.mongodb.org
 back/db/
+back/badger/
 back/log/
 htdocs/yldj/
 src/app/main/mgame
