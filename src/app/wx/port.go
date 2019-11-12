@@ -68,7 +68,8 @@ func login(message *websocket.ClientMessage, client *websocket.Client) error {
 		return err
 	}
 	if sr.Errcode != 0 {
-		return fmt.Errorf("from wx error code: %d, error message: %s", sr.Errcode, sr.Errmsg)
+		err = fmt.Errorf("from wx error code: %d, error message: %s", sr.Errcode, sr.Errmsg)
+		return err
 	}
 	wxdc := &WxBizDataCrypt{
 		AppID:      wxCfg[gamename].appID,

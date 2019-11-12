@@ -2,13 +2,15 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"time"
 )
 
 func main() {
 	//getJsonValue()
-	formTime()
+	// formTime()
+	marshal()
 }
 
 func getJsonValue() {
@@ -27,4 +29,15 @@ func getJsonValue() {
 func formTime() {
 	t := time.Now().UnixNano() / 1000000
 	fmt.Println(t)
+}
+
+func marshal() {
+	a := []int{}
+	// a = append(a, 1)
+	s, err := json.Marshal(a)
+	if err == nil {
+		fmt.Println(string(s))
+	} else {
+		fmt.Println(err.Error())
+	}
 }

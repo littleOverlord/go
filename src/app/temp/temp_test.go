@@ -12,7 +12,19 @@ func TestInitUid(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
+	fmt.Println(uid)
 	if !(uid >= 10000) {
+		t.Error("uid init fail!")
+	}
+}
+
+func TestWriteUid(t *testing.T) {
+	uid, err := GetUID()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	fmt.Println(uid)
+	if uid != 11002 {
 		t.Error("uid init fail!")
 	}
 }
@@ -35,7 +47,11 @@ func TestGoGetUid(t *testing.T) {
 		}()
 	}
 	wg.Wait()
-
+	uid, err := GetUID()
+	if err != nil {
+		t.Error(err.Error())
+	}
 	fmt.Println(time.Since(tm))
+	fmt.Printf(`uid :: %d`, uid)
 	select {}
 }

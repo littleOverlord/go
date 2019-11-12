@@ -7,6 +7,7 @@ import (
 	_ "mgame-go/app/score"
 	_ "mgame-go/app/user"
 	_ "mgame-go/app/wx"
+	_ "mgame-go/app/xhb"
 )
 
 func main() {

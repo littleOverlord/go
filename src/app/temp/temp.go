@@ -2,96 +2,83 @@ package temp
 
 import (
 	"fmt"
+	"mgame-go/ni/db"
 	"mgame-go/ni/logger"
-	"mgame-go/ni/mongodb"
+	"strconv"
 	"sync"
+	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	badger "github.com/dgraph-io/badger/v2"
 )
 
 var (
 	mux     sync.Mutex
-	lastUID UID
-	wCh     = make(chan int, 100)
+	lastUID int
 )
-
-// UID is a single db
-type UID struct {
-	ID    primitive.ObjectID `bson:"_id"`
-	Key   string             `bson:"key"`
-	Value int                `bson:"value"`
-}
 
 func init() {
 	initUID()
 	// regist ws(s) handlers
 	port()
-	go watchWrite()
 }
 
 func initUID() {
-	mux.Lock()
-	col, ctx, cancel := mongodb.Collection("client")
 	defer func() {
-		cancel()
 		if p := recover(); p != nil {
 			fmt.Println(p)
 			logger.Error(p.(string))
 		}
 	}()
-	// filter posts tagged as golang
-	filter := bson.M{"key": "uid"}
-
-	cursor := col.FindOne(ctx, filter)
-	if err := cursor.Decode(&lastUID); err != nil {
-		if err == mongo.ErrNoDocuments {
-			lastUID.Value = 10000
-			_, err := col.InsertOne(ctx, bson.M{"key": "uid", "value": 10000})
-			if err != nil {
-				panic(err.Error())
-			}
-		} else {
-			panic(err.Error())
-		}
+	col, err := db.Collection("global")
+	if err != nil {
+		panic(err.Error())
 	}
-	mux.Unlock()
+	err = col.View(func(txn *badger.Txn) error {
+		// Your code here…
+		item, err := txn.Get([]byte("UID"))
+		if err != nil {
+			return err
+		}
+		valCopy, err := item.ValueCopy(nil)
+		if err != nil {
+			return err
+		}
+		lastUID, err = strconv.Atoi(string(valCopy))
+		return err
+	})
+	if err != nil && err != badger.ErrKeyNotFound {
+		panic(err.Error())
+	}
+	if err == badger.ErrKeyNotFound {
+		lastUID = 10000
+	}
+	fmt.Printf(`init uid == %d\n`, lastUID)
 }
 
 //GetUID is the way to get new user id
 func GetUID() (int, error) {
-	var v int
 	mux.Lock()
-	v = lastUID.Value
-	lastUID.Value++
-	wCh <- lastUID.Value
+	v := lastUID
+	lastUID++
+	err := writeUID(lastUID)
+	if err != nil {
+		lastUID--
+	}
 	mux.Unlock()
-	return v, nil
+	return v, err
 }
 
 func writeUID(v int) error {
 	// fmt.Printf(`writeUID :: %d`, v)
 	// fmt.Println(lastUID.ID)
-	col, ctx, cancel := mongodb.Collection("client")
-	defer cancel()
-	filter := bson.M{"_id": lastUID.ID}
-	update := bson.M{"$set": bson.M{"value": v}}
-
-	// update document
-	_, err := col.UpdateOne(ctx, filter, update)
-	return err
-}
-
-func watchWrite() {
-	for v := range wCh {
-		n := len(wCh)
-		if n == 0 {
-			err := writeUID(v)
-			if err != nil {
-				logger.Error(err.Error())
-			}
-		}
+	col, err := db.Collection("global")
+	if err != nil {
+		return err
 	}
+	err = col.Update(func(txn *badger.Txn) error {
+		e := badger.NewEntry([]byte("UID"), []byte(strconv.Itoa(v))).WithTTL(time.Hour / 2)
+		err := txn.SetEntry(e)
+		return err
+	})
+	return err
 }

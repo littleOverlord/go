@@ -4,33 +4,34 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
+	"mgame-go/ni/db"
 	"mgame-go/ni/logger"
-	"mgame-go/ni/mongodb"
+	"mgame-go/ni/util"
 	"mgame-go/ni/websocket"
+	"strconv"
+	"sync"
+	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	badger "github.com/dgraph-io/badger/v2"
+)
+
+var (
+	rankIndex      int
+	rankStamp      int64
+	rankDBtimeLock sync.Mutex
+	clear          int
+	dropStatus     int
+	dbNameTable    = make(map[string]int)
+	dbNameLock     sync.Mutex
 )
 
 // rank user info
 type rankItem struct {
-	UID   int    `bson:"uid" json:"uid"`
-	Score int    `bson:"score" json:"score"`
-	Name  string `bson:"name" json:"name"`
-	Head  string `bson:"head" json:"head"`
-}
-
-// rank db of per game and per platform
-type rankDB struct {
-	Game string     `bson:"game" json:"game"`
-	From string     `bson:"from" json:"from"`
-	List []rankItem `bson:"list" json:"list"`
-}
-
-// channels for controling rank update && get
-type channels struct {
-	add chan *addArg
-	get chan *readArg
+	UID   int    `json:"uid"`
+	Score int    `json:"score"`
+	Name  string `json:"name"`
+	Head  string `json:"head"`
 }
 
 // read chan accept arg
@@ -39,149 +40,268 @@ type readArg struct {
 	client  *websocket.Client
 }
 
-type addArg struct {
-	ri     rankItem
-	client *websocket.Client
-}
-
-var (
-	// all game all platform rank map
-	ranks = make(map[string]*rankDB)
-	// the channels for controling rank update && get
-	rankChan = channels{
-		add: make(chan *addArg, 100),
-		get: make(chan *readArg, 100),
-	}
-)
-
-// init rank db from mongodb to memory
-func initRank() error {
+// 初始化排行数据
+func initDBinfo() error {
 	var (
-		err error
+		col   *badger.DB
+		err   error
+		index int
+		stamp = util.MondayStamp()
 	)
 	defer func() {
-		if err != nil {
-			panic("init rank error : " + err.Error())
+		if p := recover(); p != nil {
+			fmt.Println(p)
 		}
 	}()
-	col, ctx, cancel := mongodb.Collection("rank")
-	defer cancel()
-
-	filter := bson.M{}
-	cursor, err := col.Find(ctx, filter)
-	for cursor.Next(ctx) {
-		var res rankDB
-		if err = cursor.Decode(&res); err != nil {
+	col, err = db.Collection("rank")
+	if err != nil {
+		panic("initRankDBinfo error: " + err.Error())
+	}
+	txn := col.NewTransaction(true)
+	defer txn.Discard()
+	_index, err := db.ReadItemValue(txn, "index")
+	if err == badger.ErrKeyNotFound {
+		rankIndex = 0
+		rankStamp = stamp
+		err = db.InsertMany(txn, []string{
+			"index", "0",
+			"stamp", strconv.FormatInt(stamp, 10),
+		})
+		return err
+	} else if err != nil {
+		panic("initRankDBinfo error: " + err.Error())
+	}
+	index, err = strconv.Atoi(_index)
+	if err != nil {
+		panic("initRankDBinfo error: " + err.Error())
+	}
+	_stamp, err := db.ReadItemValue(txn, "stamp")
+	oldStamp, err := strconv.ParseInt(_stamp, 10, 64)
+	// 判断是否需要切换数据库
+	if oldStamp < stamp {
+		clear = index + 2
+		rankIndex = int(math.Abs(float64(index - 1)))
+		rankStamp = stamp
+		err = db.InsertMany(txn, []string{
+			"index", strconv.Itoa(rankIndex),
+			"stamp", strconv.FormatInt(rankStamp, 10),
+		})
+		if err != nil {
 			return err
 		}
-		ranks[res.Game+res.From] = &res
-		fmt.Println(res.Game)
 	}
-	fmt.Println(ranks)
-	return nil
+	dropDB(clear, txn)
+	return txn.Commit()
+}
+
+/**
+* 删除过期的排行数据库
+**/
+func dropDB(index int, txn *badger.Txn) {
+	if clear > 0 && dropStatus == 1 {
+		return
+	}
+	var wg sync.WaitGroup
+	index -= 2
+	dropStatus = 1
+	opts := badger.DefaultIteratorOptions
+	opts.PrefetchValues = true
+	opts.PrefetchSize = 100
+	opts.Reverse = true
+	it := txn.NewIterator(opts)
+	defer it.Close()
+	for it.Rewind(); it.Valid(); it.Next() {
+		item := it.Item()
+		k := string(item.Key())
+		if k != "index" && k != "stamp" {
+			dbNameTable[k] = 1
+			if clear > 0 {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					e := dropDBitem(fmt.Sprintf(`%s%d`, k, index))
+					if e != nil {
+						logger.Error(e.Error())
+					}
+				}()
+			}
+		}
+	}
+	wg.Wait()
+	dropStatus = 0
+	clear = 0
+}
+
+// 删除每个过期数据库
+func dropDBitem(key string) error {
+	col, err := db.Collection(key)
+	if err != nil {
+		return err
+	}
+	err = col.DropAll()
+	return err
 }
 
 // read rank interface for client
 func readRank(message *websocket.ClientMessage, client *websocket.Client) error {
-	rankChan.get <- &readArg{message, client}
+	// rankChan.get <- &readArg{message, client}
+	var (
+		col     *badger.DB
+		dbName  = client.Game + "_" + client.From + "_rank"
+		keysTop = make([]string, 0, 10)
+		selfTop = make([]string, 0, 10)
+
+		keysTopItem = make([]rankItem, 10, 10)
+		selfTopItem = make([]rankItem, 10, 10)
+
+		keysTopStr []byte
+		selfTopStr []byte
+
+		selfPos int
+		currPos int
+
+		_uid string
+		err  error
+	)
+	// go checkDBtime()
+	_uid, err = sumByte(strconv.Itoa(client.UID), "0000000000")
+	if err != nil {
+		return err
+	}
+
+	// col, err = db.Collection(fmt.Sprintf(`%s%d`, dbName, rankIndex))
+	col, err = db.Collection(dbName)
+	if err != nil {
+		return err
+	}
+	err = col.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = true
+		opts.PrefetchSize = 100
+		opts.Reverse = true
+		it := txn.NewIterator(opts)
+		defer it.Close()
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			k := string(item.Key())
+			u := k[19:]
+			currPos++
+			// fmt.Println(currPos)
+			if len(keysTop) < 10 {
+				keysTop = append(keysTop, k)
+			}
+			// fmt.Println(u, _uid)
+			if u == _uid {
+				selfPos = currPos
+			}
+			// fmt.Println(currPos)
+			if selfPos > 0 && currPos-selfPos == 5 {
+				return nil
+			} else if len(selfTop) < 10 {
+				selfTop = append(selfTop, k)
+			} else if len(selfTop) == 10 {
+				selfTop = append(selfTop[:0], selfTop[1:]...)
+				selfTop = append(selfTop, k)
+			}
+		}
+		if selfPos == 0 {
+			selfPos = currPos + 1
+		}
+		keysTopItem = keysTopItem[:len(keysTop)]
+		selfTopItem = selfTopItem[:len(selfTop)]
+		// fmt.Println(keysTop, selfTop)
+		err = readItems(keysTop, keysTopItem, txn)
+		if err != nil {
+			return err
+		}
+		err = readItems(selfTop, selfTopItem, txn)
+		return err
+	})
+	// fmt.Println(keysTopItem, selfTopItem)
+	if err == nil {
+		keysTopStr, err = json.Marshal(keysTopItem)
+		if err == nil {
+			selfTopStr, err = json.Marshal(selfTopItem)
+		}
+	}
+	// fmt.Println(string(keysTopStr), string(selfTopStr))
+	if err != nil {
+		client.SendMessage(message, fmt.Sprintf(`{"err":{"reson":"%s"}}`, err.Error()))
+	} else {
+		client.SendMessage(message, fmt.Sprintf(`{"ok":{"rank":%s,"top":%d,"rankTop":%s}}`, string(selfTopStr), selfPos, string(keysTopStr)))
+	}
+	return err
+}
+
+//读取每个排行的数据
+func readItems(src []string, dst []rankItem, txn *badger.Txn) error {
+	for i, v := range src {
+		var it rankItem
+		_item, err := txn.Get([]byte(v))
+		if err != nil {
+			return err
+		}
+		_valCopy, err := _item.ValueCopy(nil)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(_valCopy, &it)
+		if err != nil {
+			return err
+		}
+		dst[i] = it
+	}
 	return nil
 }
 
-// check db has rank && return *caclRank
-func checkDBHasRank(game string, from string) (*rankDB, error) {
-	col, ctx, cancel := mongodb.Collection("rank")
-	defer cancel()
-
-	filter := bson.M{"game": game, "from": from}
-	cursor := col.FindOne(ctx, filter)
-	var res rankDB
-	if err := cursor.Decode(&res); err != nil {
-		if err == mongo.ErrNoDocuments {
-			err = nil
-		}
-
-		return nil, err
-	}
-	ranks[res.Game+res.From] = &res
-	return ranks[res.Game+res.From], nil
-}
-
 // update rank
-func updateRank(ri *rankItem, client *websocket.Client) (rd *rankDB, err error) {
-	rd = ranks[client.Game+client.From]
-	if rd == nil {
-		rd, err = checkDBHasRank(client.Game, client.From)
+func updateRank(old string, score int, client *websocket.Client, leftTime time.Duration) (err error) {
+	var (
+		col    *badger.DB
+		dbName = client.Game + "_" + client.From + "_rank"
+		key    string
+	)
+	defer func() {
 		if err != nil {
-			return nil, errors.New("rank.checkDBHasRank ::: " + err.Error())
+			logger.Error(err.Error())
 		}
-		if rd == nil {
-			rd = &rankDB{
-				Game: client.Game,
-				From: client.From,
-				List: []rankItem{*ri},
-			}
-			err = saveRank(rd)
-			if err != nil {
-				return nil, errors.New("rank.saveRank ::: " + err.Error())
-			}
-			ranks[client.Game+client.From] = rd
-			return nil, nil
-
-		}
-		ranks[client.Game+client.From] = rd
+	}()
+	// go checkDBtime()
+	// go addDBName(dbName)
+	// col, err = db.Collection(fmt.Sprintf(`%s%d`, dbName, rankIndex))
+	col, err = db.Collection(dbName)
+	if err != nil {
+		return err
 	}
-	return rd, nil
-}
-
-// save rank to mongodb
-func saveRank(rd *rankDB) error {
-	col, ctx, cancel := mongodb.Collection("rank")
-	defer cancel()
-	_, err := col.InsertOne(ctx, *rd)
-	return err
+	txn := col.NewTransaction(true)
+	defer txn.Discard()
+	if old != "0" {
+		err = deleteOld(client.UID, old, txn)
+		if err != nil {
+			return err
+		}
+	}
+	_score := strconv.Itoa(score)
+	key, err = megerKey(client.UID, _score)
+	if err != nil {
+		return err
+	}
+	e := badger.NewEntry([]byte(key), []byte(fmt.Sprintf(`{"uid":%d,"score":%d,"name":"%s","head":"%s"}`, client.UID, score, client.Name, client.Head))).WithTTL(leftTime)
+	err = txn.SetEntry(e)
+	if err != nil {
+		return err
+	}
+	// Commit the transaction.
+	return txn.Commit()
 }
 
 // read rank handler
 func sendRank(ar *readArg) error {
 	var (
-		rd     = ranks[ar.client.Game+ar.client.From]
-		index  = -1
-		inTop  bool
-		length int
-		start  = 3
-		end    int
-		r      []rankItem
+		index = -1
+		start = 3
+		r     []rankItem
 	)
-	if rd == nil {
-		ar.client.SendMessage(ar.message, `{"ok":{"rank":"","top":0,"start":-1}}`)
-		return nil
-	}
-	length = len(rd.List)
-	for i, v := range rd.List {
-		inTop = v.UID == ar.client.UID
-		if inTop {
-			index = i
-			break
-		}
-	}
-	end = 10
-	if index > 6 {
-		start = index - 3
-		end = index + 4
-		if end > length {
-			end = length
-		}
-		r = append(rd.List[0:3], rd.List[start:end]...)
-	} else if index == -1 && length > 10 {
-		start = length - 7
-		end = length
-		r = append(rd.List[0:3], rd.List[start:end]...)
-	} else {
-		if end > length {
-			end = length
-		}
-		r = rd.List[0:end]
-	}
 	sr, err := json.Marshal(r)
 	if err != nil {
 		ar.client.SendMessage(ar.message, fmt.Sprintf(`{"err":{"reson":"%s"}}`, err.Error()))
@@ -191,119 +311,128 @@ func sendRank(ar *readArg) error {
 	return err
 }
 
-// add one score and resort the rank list
-func sortRank(ada *addArg) {
+/**
+* 处理数字按位数补零
+**/
+func sumByte(numStr string, src string) (string, error) {
+	// fmt.Println("sumByte :: ")
+	if src == "" {
+		src = "0000000000000000000"
+	}
+	empty := []byte(src)
+	num := []byte(numStr)
+	len1 := len(empty)
+	len2 := len(num)
+	diff := len1 - len2
+	if diff < 0 {
+		return "", errors.New("the number is too large")
+	}
+
+	for i := 0; i < len2; i++ {
+		empty[i+diff] = num[i]
+	}
+	// fmt.Println(string(empty))
+	return string(empty), nil
+}
+
+// 合并排行榜每条数据的key
+// @return like "0000000000000000137600000000001"前20位是排序的数据 后11位是uid
+func megerKey(uid int, src string) (string, error) {
+	_key1, e := sumByte(src, "")
+	if e != nil {
+		return "", e
+	}
+	_key2, e := sumByte(strconv.Itoa(uid), "0000000000")
+	if e != nil {
+		return "", e
+	}
+	key := _key1 + _key2
+	return key, nil
+}
+
+/**
+* 删除老的排行数据
+**/
+func deleteOld(uid int, old string, txn *badger.Txn) error {
+	key, err := megerKey(uid, old)
+	if err != nil {
+		return err
+	}
+	err = txn.Delete([]byte(key))
+	return err
+}
+
+// 存储新数据库名字
+func addDBName(name string) error {
+	dbNameLock.Lock()
 	var (
-		rd, err = updateRank(&ada.ri, ada.client)
+		col *badger.DB
+		err error
 	)
-	if rd == nil {
+	defer func() {
+		dbNameLock.Unlock()
 		if err != nil {
 			logger.Error(err.Error())
 		}
-		return
+	}()
+	in := dbNameTable[name]
+	if in == 1 {
+		return nil
 	}
-	rd.List = removeSame(rd.List, &(ada.ri))
-	leng := len(rd.List)
-
-	if leng == 0 {
-		rd.List = append(rd.List, ada.ri)
-	} else if ada.ri.Score >= rd.List[0].Score {
-		rd.List = sliceInsert(rd.List, 0, &(ada.ri))
-	} else if ada.ri.Score >= rd.List[leng-1].Score {
-		rd.List = sliceInsert(rd.List, halfInsert(rd, &(ada.ri)), &(ada.ri))
-	} else if leng < 100 {
-		rd.List = append(rd.List, ada.ri)
-	} else {
-		return
-	}
-	leng = len(rd.List)
-	if leng > 100 {
-		rd.List = rd.List[:100]
-	}
-	col, ctx, cancel := mongodb.Collection("rank")
-	defer cancel()
-
-	filter := bson.M{"game": rd.Game, "from": rd.From}
-	_, err = col.UpdateOne(ctx, filter, bson.M{"$set": bson.M{"list": rd.List}})
+	col, err = db.Collection("rank")
 	if err != nil {
-		logger.Error("rank.sortRank ::: " + err.Error())
+		return err
 	}
+	err = col.Update(func(txn *badger.Txn) error {
+		e := badger.NewEntry([]byte(name), []byte("1")).WithTTL(time.Hour / 2)
+		err := txn.SetEntry(e)
+		return err
+	})
+	if err == nil {
+		dbNameTable[name] = 1
+	}
+	return err
 }
 
-// dichotomy insert rank
-func halfInsert(rd *rankDB, ri *rankItem) int {
+//检查数据库是否过期
+func checkDBtime() error {
+	rankDBtimeLock.Lock()
+	defer rankDBtimeLock.Unlock()
 	var (
-		prev = 0
-		last = len(rd.List) - 1
-		i    = (last / 2) + 1
-		ti   int
+		stamp = util.MondayStamp()
+		wg    sync.WaitGroup
 	)
 
-	for {
-		i = ti
-		if rd.List[i].Score > ri.Score {
-			ti = i + (last-i)/2
-			prev = i
-			if ti == i {
-				i = i + 1
-				ti = i
-			}
-		} else if rd.List[i].Score < ri.Score {
-			ti = prev + (i-prev)/2
-			last = i
-			if ti == i {
-				i = i - 1
-				ti = i
-			}
+	if rankStamp < stamp {
+		clear = rankIndex
+		rankIndex = int(math.Abs(float64(rankIndex - 1)))
+		rankStamp = stamp
+		for name, _ := range dbNameTable {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				err := dropDBitem(name)
+				if err != nil {
+					logger.Error(err.Error())
+				}
+			}()
 		}
-		if ti == i {
-			break
+
+		col, err := db.Collection("rank")
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		txn := col.NewTransaction(true)
+		defer txn.Discard()
+
+		err = db.InsertMany(txn, []string{
+			"index", strconv.Itoa(rankIndex),
+			"stamp", strconv.FormatInt(rankStamp, 10),
+		})
+		if err != nil {
+			logger.Error(err.Error())
 		}
 	}
-	return ti
-}
-
-// rank channels
-func (rc *channels) cacl() {
-	defer func() {
-		if p := recover(); p != nil {
-			logger.Error(p.(string))
-		}
-	}()
-	for {
-		select {
-		case ar, ok := <-rc.get:
-			if !ok {
-				panic("read caclRank.get chan fail")
-			}
-			sendRank(ar)
-		case ada, ok := <-rc.add:
-			if !ok {
-				panic("read caclRank.add chan fail")
-			}
-			sortRank(ada)
-		}
-	}
-}
-
-// insert one element to a slice
-func sliceInsert(s []rankItem, i int, el *rankItem) []rankItem {
-	n := []rankItem{*el}
-	start := append([]rankItem{}, s[0:i]...)
-	end := s[i:]
-	start = append(start, n...)
-	end = append(start, end...)
-	return end
-}
-
-// find the index of same user in ranks list
-func removeSame(s []rankItem, el *rankItem) []rankItem {
-	i := 0
-	for _, v := range s {
-		if v.UID != el.UID {
-			s[i] = v
-			i++
-		}
-	}
-	return s[:i]
+	wg.Wait()
+	return nil
 }

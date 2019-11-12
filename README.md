@@ -33,7 +33,47 @@ pkg：包文件
 
 bin：相关bin文件
 
-## 卸载
+## 使用go.mod
+参考：https://juejin.im/post/5c8e503a6fb9a070d878184a
+
+1. 使用 `go mod init 模块名` 初始化go.mod
+2. 运行go项目将会自动分析依赖，并下载，不需要自己go get
+依赖下载到$GOPATH/pkg/mod目录下，这样所有使用 go mod 的项目都可以共用。
+
+*注* `go mod tidy`: 在项目根目录下执行该命令，go mod 会自动分析你当前项目所需要的依赖，并且将他们下载下来。
+
+
+## 编译
+
+Mac 下编译 Linux 和 Windows 64位可执行程序
+
+> CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
+
+> CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build main.go
+
+Linux 下编译 Mac 和 Windows 64位可执行程序
+
+> CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build main.go
+
+> CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build main.go
+
+Windows 下编译 Mac 和 Linux 64位可执行程序
+
+> SET CGO_ENABLED=0
+> SET GOOS=darwin
+> SET GOARCH=amd64
+> go build main.go
+ 
+> SET CGO_ENABLED=0
+> SET GOOS=linux
+> SET GOARCH=amd64
+> go build main.go
+
+GOOS：目标平台的操作系统（darwin、freebsd、linux、windows） 
+GOARCH：目标平台的体系架构（386、amd64、arm） 
+交叉编译不支持 CGO 所以要禁用它
+
+## 卸载go
 
 > rm -rf /usr/local/go
 
@@ -43,24 +83,29 @@ bin：相关bin文件
 
 ## 包
 ### 包导入
-+相对路径
-import ".model"  //<--是与当前文件同一目录的model目录,但是不建议使用这种方式来导包
+1. 相对路径
+    import ".model"  //<--是与当前文件同一目录的model目录,但是不建议使用这种方式来导包
 
-+绝对路径
-import "shortcut/model" //<--加载gopath/src/shortulr/model模块
+2. 绝对路径
 
-+包名操作
--import(."fmt")
-这个点操作的含义就是这个包导入之后在你调用这个包的函数时， 你可以省略前缀的包名， 也就是前面你调用的fmt. Println("hello world") 可以省略的写成Println("hello world"),无闻的视频上建议不要使用这样的方式,可读性太差
+    import "shortcut/model" //<--加载gopath/src/shortulr/model模块
 
--import(f"fmt")
-别名操作的话调用包函数时前缀变成了 我们的前缀， 即f.Println("hello world"),个人不喜欢这种方式,好好的系统包调用名字你给改了,其他人读代码多不爽
+3. 包名操作
 
--import (
-"database/sql"
-_"github.com/ziutek/mymysql/godrv"//<----很重要 感谢天感谢地可算知道这破玩意是啥意思了
-)
-_操作其实是引入该包，而不直接使用包里面的函数， 而是调用了该包里面的init函数
+    `-import(."fmt")`
+
+    这个点操作的含义就是这个包导入之后在你调用这个包的函数时， 你可以省略前缀的包名， 也就是前面你调用的fmt. Println("hello world") 可以省略的写成Println("hello world"),无闻的视频上建议不要使用这样的方式,可读性太差
+
+    `-import(f"fmt")`
+    别名操作的话调用包函数时前缀变成了 我们的前缀， 即`f.Println("hello world")`,个人不喜欢这种方式,好好的系统包调用名字你给改了,其他人读代码多不爽
+
+    ```
+    -import (
+    "database/sql"
+    _"github.com/ziutek/mymysql/godrv"//<----很重要 感谢天感谢地可算知道这破玩意是啥意思了
+    )
+    ```
+    _操作其实是引入该包，而不直接使用包里面的函数， 而是调用了该包里面的init函数
 
 ## 任务
 

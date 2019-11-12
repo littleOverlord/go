@@ -26,6 +26,7 @@ func init() {
 	}()
 	srcAbs = srcPath()
 	loadConfig("app")
+	// fmt.Println(Table)
 }
 
 // 读取某个目录下的json

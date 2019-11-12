@@ -43,5 +43,12 @@
             "appID": "wx72c4894e567fd04d",
             "appSecret": "525d6fd5ad5a671ffb100340e8259ac9"
         }
+    },
+    "xiaohuoban":{
+        "yldj":{
+            "id":"100611",
+            "key":"0a8dd6cbf338b9af",
+            "secret":"4af86a5e34c18cbfd340904e101cc250"
+        }
     }
 }

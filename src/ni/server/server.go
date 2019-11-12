@@ -89,7 +89,7 @@ func httpsServer(scheme string, cfg map[string]interface{}, hf httpHandleFunc) e
 	tlsCrt := cfg["https"].(map[string]interface{})["crt"].(string)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hf)
-	fmt.Println(":"+port, path.Join(util.WorkSpace, tlsKey), path.Join(util.WorkSpace, tlsCrt))
+	// fmt.Println(":"+port, path.Join(util.WorkSpace, tlsKey), path.Join(util.WorkSpace, tlsCrt))
 	err := http.ListenAndServeTLS(":"+port, path.Join(util.WorkSpace, tlsCrt), path.Join(util.WorkSpace, tlsKey), mux)
 	if err != nil {
 		logger.Error(err.Error())

@@ -7,13 +7,13 @@ import (
 	"io/ioutil"
 	"mgame-go/app/temp"
 	"mgame-go/ni/config"
+	"mgame-go/ni/db"
 	"mgame-go/ni/logger"
-	"mgame-go/ni/mongodb"
 	"mgame-go/ni/websocket"
 	"net/http"
+	"strconv"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	badger "github.com/dgraph-io/badger/v2"
 )
 
 var wxCfg = make(map[string]*wxProject)
@@ -74,32 +74,68 @@ func findUserByName(gamename string, info interface{}, client *websocket.Client)
 		return "", errors.New("arg error")
 	}
 	from := "wx"
-	col, ctx, cancel := mongodb.Collection(gamename + "_user")
-	defer cancel()
-	filter := bson.M{"username": username}
 	var (
-		res userDB
+		uid string
 		msg string
 	)
-	cursor := col.FindOne(ctx, filter)
-	if err := cursor.Decode(&res); err != nil {
-		if err == mongo.ErrNoDocuments {
-			uid, err := temp.GetUID()
-			if err != nil {
-				return "", err
-			}
-			_, err = col.InsertOne(ctx, bson.M{"uid": uid, "username": username, "name": name, "from": from, "head": head})
-			if err != nil {
-				return "", err
-			}
-			go websocket.AddClientToCache(uid, name, head, from, gamename, client)
-			msg = fmt.Sprintf(`{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s"}`, uid, username, name, from, head)
-		} else {
-			return "", err
-		}
-	} else {
-		go websocket.AddClientToCache(res.UID, name, head, from, gamename, client)
-		msg = fmt.Sprintf(`{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s"}`, res.UID, res.Username, res.Name, res.From, res.Head)
+
+	col, err := db.Collection(gamename + "_user")
+	if err != nil {
+		return "", err
 	}
+	err = col.View(func(txn *badger.Txn) error {
+		// Your code here…
+		item, err := txn.Get([]byte(username))
+		if err != nil {
+			return err
+		}
+		_cu, err := item.ValueCopy(nil)
+		if err != nil {
+			return err
+		}
+		uid = string(_cu)
+		return nil
+	})
+	if err != badger.ErrKeyNotFound {
+		if err == nil {
+			_uid, err := strconv.Atoi(uid)
+			if err != nil {
+				return "", err
+			}
+			go websocket.AddClientToCache(_uid, name, head, from, gamename, client)
+			msg = fmt.Sprintf(`{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s","regist":0}`, _uid, username, name, from, head)
+		}
+		return msg, err
+	}
+	_uid, err := temp.GetUID()
+	if err != nil {
+		return "", err
+	}
+	// uid = strconv.Itoa(_uid)
+	err = inserNewUser(col, _uid, username, name, from, head, username)
+	// fmt.Println(uid)
+	if err != nil {
+		return "", err
+	}
+	go websocket.AddClientToCache(_uid, name, head, from, gamename, client)
+	msg = fmt.Sprintf(`{"uid": %d, "username": "%s", "name": "%s", "from": "%s", "head": "%s","regist":1}`, _uid, username, name, from, head)
 	return msg, nil
+}
+
+func inserNewUser(col *badger.DB, uid int, username string, name string, from string, head string, password string) error {
+	txn := col.NewTransaction(true)
+	defer txn.Discard()
+	err := db.InsertMany(txn, []string{
+		strconv.Itoa(uid), username,
+		username, strconv.Itoa(uid),
+		strconv.Itoa(uid) + "from", from,
+		strconv.Itoa(uid) + "name", name,
+		strconv.Itoa(uid) + "password", password,
+		strconv.Itoa(uid) + "head", head,
+	})
+	if err != nil {
+		return err
+	}
+	// Commit the transaction.
+	return txn.Commit()
 }

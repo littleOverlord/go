@@ -2,14 +2,15 @@ package score
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"mgame-go/ni/mongodb"
+	"mgame-go/ni/db"
 	"mgame-go/ni/util"
 	"mgame-go/ni/websocket"
+	"strconv"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	badger "github.com/dgraph-io/badger/v2"
 )
 
 // the db type is saving one user score data
@@ -27,95 +28,133 @@ type addMessage struct {
 }
 
 func init() {
+	// initDBinfo()
 	// regist ws(s) handlers
-	initRank()
-	go rankChan.cacl()
 	port()
 }
 
 // read self score db data
 func readScore(message *websocket.ClientMessage, client *websocket.Client) error {
 	var (
-		err   error
-		res   scoreDB
-		phase int
+		err     error
+		phase   int
+		history int
+		col     *badger.DB
 	)
 	defer func() {
 		if err != nil {
 			client.SendMessage(message, fmt.Sprintf(`{"err":"%s"}`, err.Error()))
 		}
 	}()
-	col, ctx, cancel := mongodb.Collection(client.Game + "_score")
-	defer cancel()
-
-	filter := bson.M{"uid": client.UID}
-	cursor := col.FindOne(ctx, filter)
-	if err := cursor.Decode(&res); err != nil {
-		if err != mongo.ErrNoDocuments {
+	col, err = db.Collection(client.Game + "_score")
+	if err != nil {
+		return err
+	}
+	err = col.View(func(txn *badger.Txn) error {
+		var (
+			_phase   string
+			_history string
+		)
+		_phase, err := db.ReadItemValue(txn, scoreKey(client, "phase"))
+		if err == badger.ErrKeyNotFound {
+			_phase = "0"
+		} else if err != nil {
 			return err
 		}
-	}
-	if res.Time > 0 && util.MondayStamp() < res.Time {
-		phase = res.Phase
-	}
-	client.SendMessage(message, fmt.Sprintf(`{"ok": {"history": %d, "phase": %d}}`, res.History, phase))
+		phase, err = strconv.Atoi(_phase)
+		if err != nil {
+			return err
+		}
+
+		_history, err = db.ReadItemValue(txn, scoreKey(client, "history"))
+		if err == badger.ErrKeyNotFound {
+			_history = "0"
+		} else if err != nil {
+			return err
+		}
+		history, err = strconv.Atoi(_history)
+		return err
+	})
+
+	client.SendMessage(message, fmt.Sprintf(`{"ok": {"history": %d, "phase": %d}}`, history, phase))
 	return nil
 }
 
 // add || update self score db data
 func addScore(message *websocket.ClientMessage, client *websocket.Client) error {
 	var (
-		err error
-		res scoreDB
-		arg addMessage
-		t   int64
+		err      error
+		arg      addMessage
+		history  string
+		old      string
+		col      *badger.DB
+		leftTime time.Duration
 	)
 	defer func() {
 		if err != nil {
 			client.SendMessage(message, fmt.Sprintf(`{"err":{"reson":"%s"}}`, err.Error()))
+		} else {
+			client.SendMessage(message, `{"ok": "ok"}`)
+			updateRank(old, arg.Score, client, leftTime)
 		}
 	}()
-	err = json.Unmarshal(message.ArgB, &arg)
+	leftTime, err = time.ParseDuration(fmt.Sprintf(`%dns`, 7*24*60*60*1000*1000000-(time.Now().UnixNano()-util.MondayStamp())))
 	if err != nil {
 		return err
 	}
-	col, ctx, cancel := mongodb.Collection(client.Game + "_score")
-	defer cancel()
+	err = json.Unmarshal(message.ArgB, &arg)
+	if err != nil {
+		return err
+	} else if arg.Score <= 0 {
+		return errors.New("the score can't be equal or less than 0")
+	}
+	col, err = db.Collection(client.Game + "_score")
+	if err != nil {
+		return err
+	}
+	txn := col.NewTransaction(true)
+	defer txn.Discard()
+	old, err = db.ReadItemValue(txn, scoreKey(client, "phase"))
+	if err == badger.ErrKeyNotFound {
+		old = "0"
+	} else if err != nil {
+		return err
+	}
 
-	filter := bson.M{"uid": client.UID}
-	cursor := col.FindOne(ctx, filter)
-	t = time.Now().UnixNano() / 1000000
-	if err := cursor.Decode(&res); err != nil {
-		if err == mongo.ErrNoDocuments {
-			_, err = col.InsertOne(ctx, bson.M{"uid": client.UID, "history": arg.Score, "phase": arg.Score, "time": t, "from": client.From})
-			if err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
+	history, err = db.ReadItemValue(txn, scoreKey(client, "history"))
+	if err == badger.ErrKeyNotFound {
+		history = "0"
+	} else if err != nil {
+		return err
 	}
-	if res.Time > 0 {
-		if arg.Score > res.History {
-			res.History = arg.Score
-		}
-		if arg.Score > res.Phase || util.MondayStamp() > res.Time {
-			res.Phase = arg.Score
-		}
-		_, err = col.UpdateOne(ctx, filter, bson.M{"$set": bson.M{"history": res.History, "phase": res.Phase, "time": t}})
-		if err != nil {
-			return err
-		}
+	_score := strconv.Itoa(arg.Score)
+	_history, e := strconv.Atoi(history)
+	if e != nil {
+		return e
 	}
-	client.SendMessage(message, `{"ok": "ok"}`)
-	rankChan.add <- &addArg{
-		ri: rankItem{
-			UID:   client.UID,
-			Score: arg.Score,
-			Name:  client.Name,
-			Head:  client.Head,
-		},
-		client: client,
+	if arg.Score > _history {
+		history = _score
 	}
-	return nil
+	et := badger.NewEntry([]byte(scoreKey(client, "phase")), []byte(_score)).WithTTL(leftTime)
+	err = txn.SetEntry(et)
+	if err != nil {
+		return err
+	}
+	err = db.InsertMany(txn, []string{
+		scoreKey(client, "history"), history,
+		//scoreKey(client, "ctime"), strconv.FormatInt(time.Now().UnixNano(), 10),
+	})
+	if err != nil {
+		return err
+	}
+	// Commit the transaction.
+	return txn.Commit()
+}
+
+// mix score db key
+// @param suffix "phase"||"history"
+func scoreKey(client *websocket.Client, suffix string) string {
+	suid := strconv.Itoa(client.UID)
+	s := suid + client.From + suffix
+	return s
 }

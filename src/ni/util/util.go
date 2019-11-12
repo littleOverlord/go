@@ -66,5 +66,6 @@ func MondayStamp() int64 {
 	}
 
 	weekStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, offset)
-	return weekStart.UnixNano() / 1000000
+	return weekStart.UnixNano()
+	// 1000000
 }
