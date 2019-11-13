@@ -19,13 +19,7 @@
         }
     },
     "db":{
-        "name":"mgame",
-        "url":"mongodb://localhost:29817/",
-        "index":{
-            "userid":{"keys":{"gamename":1}},
-            "user":{"keys":{"username":1,"uid":1}},
-            "rank_yldj":{"keys":{"uid":1,"score":1}}
-        }
+        "dir":"back/badger"
     },
     "static": {
         "dir":"htdocs",
@@ -35,6 +29,16 @@
         "dir":"back/log"
     }, 
     "wx": {
+        "tulong":{
+            "appID": "wxad18629d00712016",
+            "appSecret": "5b1adddfb53938f13f34dad28ac51ee5"
+        },
+        "yldj":{
+            "appID": "wx72c4894e567fd04d",
+            "appSecret": "525d6fd5ad5a671ffb100340e8259ac9"
+        }
+    },
+    "bd": {
         "tulong":{
             "appID": "wxad18629d00712016",
             "appSecret": "5b1adddfb53938f13f34dad28ac51ee5"

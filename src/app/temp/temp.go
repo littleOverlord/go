@@ -6,7 +6,6 @@ import (
 	"mgame-go/ni/logger"
 	"strconv"
 	"sync"
-	"time"
 
 	badger "github.com/dgraph-io/badger/v2"
 )
@@ -76,7 +75,7 @@ func writeUID(v int) error {
 		return err
 	}
 	err = col.Update(func(txn *badger.Txn) error {
-		e := badger.NewEntry([]byte("UID"), []byte(strconv.Itoa(v))).WithTTL(time.Hour / 2)
+		e := badger.NewEntry([]byte("UID"), []byte(strconv.Itoa(v)))
 		err := txn.SetEntry(e)
 		return err
 	})

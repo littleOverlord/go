@@ -9,15 +9,15 @@ import (
 )
 
 type userInfo struct {
-	OpenID   string //这里返回的open_id是最长64位的字符创
-	Avatar   string //始终是http格式
-	Nickname string
-	Gender   string // 0 女, 1男
+	OpenID   string `json:"open_id,omitemoty"` //这里返回的open_id是最长64位的字符创
+	Avatar   string `json:"avatar,omitemoty"`  //始终是http格式
+	Nickname string `json:"nickname,omitemoty"`
+	Gender   string `json:"gender,omitemoty"` // 0 女, 1男
 }
 
 type userResult struct {
-	Code    int    // 0=成功=0  非0=失败
-	Message string // 错误描述
+	Code    int    `json:"code,omitemoty"`    // 0=成功=0  非0=失败
+	Message string `json:"message,omitemoty"` // 错误描述
 	Data    userInfo
 }
 

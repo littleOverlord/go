@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"strconv"
+	"sync"
 	"time"
 
 	badger "github.com/dgraph-io/badger/v2"
@@ -26,6 +27,7 @@ func main() {
 	t0 := time.Now()
 	// err = insertOne()
 	// err = insertMany()
+	rankAll()
 	// err = read()
 	// err = readAll()
 	// err = deleteAll()
@@ -104,10 +106,12 @@ func insertMany() error {
 	for i := 1; i < 10000; i++ {
 		is := strconv.Itoa(i)
 		score := rand.Intn(10000) + 1
-
-		err := txn.Set([]byte(sumByte(strconv.Itoa(score), "")+sumByte(is, "0000000000")), []byte("1"))
+		err := txn.Set([]byte(sumByte(strconv.Itoa(score), "")+sumByte(is, "0000000000")), []byte(fmt.Sprintf(`{"score":%d,"uid":%d}`, score, i)))
 		if err != nil {
 			return err
+		}
+		if (i+1)%500 == 0 {
+			fmt.Printf(`finished %d`, i+1)
 		}
 	}
 
@@ -164,6 +168,68 @@ func readAll() error {
 		return nil
 	})
 	return err
+}
+
+type rankItem struct {
+	UID   int `json:"uid"`
+	Score int `json:"score"`
+}
+
+func rank() {
+	t0 := time.Now()
+	index := 9900
+	until := index + 10
+	count := 0
+	fmt.Println(index)
+	err := db.View(func(txn *badger.Txn) error {
+		count++
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = true
+		opts.PrefetchSize = 100
+		opts.Reverse = true
+		it := txn.NewIterator(opts)
+		defer it.Close()
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			k := item.Key()
+			if string(k) == "0" {
+				fmt.Println(k, until)
+			}
+			// if count >= index && count < until {
+			// 	valCopy, err := item.ValueCopy(nil)
+			// 	if err != nil {
+			// 		return err
+			// 	}
+			// 	var _item rankItem
+			// 	err = json.Unmarshal(valCopy, &_item)
+			// 	if err != nil {
+			// 		return err
+			// 	}
+			// 	if _item.UID == 0 {
+			// 		fmt.Println(string(valCopy))
+			// 	}
+			// }
+		}
+		return nil
+	})
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	t1 := time.Now()
+	fmt.Println(t1.Sub(t0))
+}
+
+func rankAll() {
+	var wg sync.WaitGroup
+
+	for i := 0; i < 20; i++ {
+		wg.Add(1)
+		go func() {
+			rank()
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 }
 
 func deleteAll() error {

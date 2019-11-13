@@ -149,10 +149,10 @@ func readRank(message *websocket.ClientMessage, client *websocket.Client) error 
 		col     *badger.DB
 		dbName  = client.Game + "_" + client.From + "_rank"
 		keysTop = make([]string, 0, 10)
-		selfTop = make([]string, 0, 10)
+		selfTop = make([]string, 0, 6)
 
 		keysTopItem = make([]rankItem, 10, 10)
-		selfTopItem = make([]rankItem, 10, 10)
+		selfTopItem = make([]rankItem, 6, 6)
 
 		keysTopStr []byte
 		selfTopStr []byte
@@ -195,13 +195,16 @@ func readRank(message *websocket.ClientMessage, client *websocket.Client) error 
 				selfPos = currPos
 			}
 			// fmt.Println(currPos)
-			if selfPos > 0 && currPos-selfPos == 5 {
-				return nil
-			} else if len(selfTop) < 10 {
+			if len(selfTop) < 6 {
 				selfTop = append(selfTop, k)
-			} else if len(selfTop) == 10 {
+			} else if len(selfTop) == 6 && (selfPos == 0 || currPos-selfPos < 2) {
 				selfTop = append(selfTop[:0], selfTop[1:]...)
 				selfTop = append(selfTop, k)
+			}
+			if selfPos > 0 && currPos-selfPos >= 2 {
+				if len(keysTop) == 10 && len(selfTop) == 6 {
+					break
+				}
 			}
 		}
 		if selfPos == 0 {
